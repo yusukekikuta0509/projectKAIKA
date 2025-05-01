@@ -1,89 +1,250 @@
 /* src/app/app/haptic/haptic.module.css */
-.container {
-    padding: 2rem;
-    max-width: 600px; /* 縦長画面を意識 */
-    margin: 0 auto;
+
+/* メインコンテナ */
+.main {
+    min-height: 100vh;
+    padding: 0rem 4rem 4rem 4rem; /* 上部はヘッダー分空ける */
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 中央寄せ */
+    color: #fff;
   }
   
+  /* ヘッダー (トップページと共通のデザインを想定) */
   .header {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eaeaea;
-  }
-  .header h1 {
-    margin: 0;
-  }
-  .header nav a {
-    margin-left: 1rem;
-    color: #0070f3;
-  }
-  .header nav a:hover {
-    text-decoration: underline;
+    padding: 1.5rem 0; /* 上下のパディング */
+    margin-bottom: 4rem; /* ヘッダー下のマージン */
+    position: sticky; /* ヘッダーを追従させる場合 */
+    top: 0;
+    z-index: 100;
+    /* background: rgba(0, 0, 0, 0.5); /* 背景を少し暗くする場合 */
+    /* backdrop-filter: blur(10px); */
   }
   
-  .controls {
-    margin-bottom: 2rem;
-    text-align: center;
+  .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none; /* Linkコンポーネント用 */
   }
-  .controls h2 {
-    margin-bottom: 1rem;
+  
+  .nav {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .navLink {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+  }
+  
+  .navLink:hover {
+    color: #fff;
+  }
+  
+  .walletButton > button { /* WalletMultiButtonのスタイル調整 */
+    background-color: #ff6b00 !important; /* !important で強制上書き */
+    color: #fff !important;
+    border: none !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+  }
+  
+  .walletButton > button:hover {
+    background-color: #e05e00 !important;
+  }
+  
+  
+  /* 背景 (トップページから流用) */
+  .gradientBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+  }
+  
+  .dotGrid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  
+  /* コンテンツセクション */
+  .contentWrapper {
+    width: 100%;
+    max-width: 800px; /* コンテンツの最大幅 */
+    display: flex;
+    flex-direction: column;
+    gap: 3rem; /* セクション間のギャップ */
+  }
+  
+  .section {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #eee;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.8rem;
+  }
+  
+  /* コントロールセクション */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 中央揃え */
+    gap: 1rem;
   }
   
   .toggleButton {
     padding: 0.8rem 2rem;
     font-size: 1.1rem;
+    font-weight: bold;
     border: none;
-    color: white;
-    border-radius: 20px; /* 丸みのあるボタン */
-  }
-  .toggleButton.on {
-    background-color: #4caf50; /* 緑 */
-  }
-  .toggleButton.off {
-    background-color: #f44336; /* 赤 */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-width: 150px;
+    text-align: center;
   }
   
-  .feelingsList h2 {
-    text-align: center;
-    margin-bottom: 1rem;
+  .toggleButton.on {
+    background-color: #ff6b00;
+    color: white;
   }
+  
+  .toggleButton.off {
+    background-color: #555;
+    color: #ccc;
+  }
+  
+  /* 感覚リストセクション */
   .feelingsList ul {
     list-style: none;
     padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
   
   .feelingItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid #eee;
+    padding: 1rem 1.5rem;
+    background-color: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
-    background-color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
   }
   
   .feelingItem.selected {
-    border-left: 5px solid #0070f3; /* 選択されている感を出す */
-    background-color: #f0f8ff;
+    background-color: rgba(255, 107, 0, 0.2);
+    border-color: rgba(255, 107, 0, 0.5);
   }
   
   .feelingItem span {
-    font-weight: 500;
+    font-size: 1.1rem;
+    color: #eee;
   }
   
-  .buttons button {
-    margin-left: 0.5rem;
+  .buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
   }
   
-  .purchaseButton {
-    background-color: #ff9800; /* オレンジ */
-    color: white;
+  .feelingItem button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
     border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    min-width: 100px; /* ボタン幅を揃える */
+    text-align: center;
   }
-  .purchaseButton:hover {
-    background-color: #f57c00;
+  
+  .feelingItem button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .feelingItem button:not(:disabled):hover {
+    opacity: 0.8;
+  }
+  
+  /* Select Button */
+  .feelingItem button:not(.purchaseButton) {
+    background-color: #333;
+    color: #eee;
+    border: 1px solid #555;
+  }
+  .feelingItem button:not(.purchaseButton):disabled {
+      background-color: #444;
+      color: #888;
+  }
+  .feelingItem.selected button:not(.purchaseButton) {
+    background-color: #ff6b00;
+    color: white;
+    border: 1px solid #ff6b00;
+  }
+  
+  
+  /* Purchase Button */
+  .purchaseButton {
+    background-color: #007bff; /* 例: 青色 */
+    color: white;
+  }
+  .purchaseButton:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+  .purchaseButton.purchasing {
+      background-color: #5a6268; /* 処理中 */
+      cursor: default;
+  }
+  
+  /* ローディングインジケーター */
+  .loader {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #ff6b00;
+    animation: spin 1s ease-in-out infinite;
+    margin-left: auto; /* 右端に寄せる */
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
