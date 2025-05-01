@@ -1,0 +1,89 @@
+/* src/app/app/haptic/haptic.module.css */
+.container {
+    padding: 2rem;
+    max-width: 600px; /* 縦長画面を意識 */
+    margin: 0 auto;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eaeaea;
+  }
+  .header h1 {
+    margin: 0;
+  }
+  .header nav a {
+    margin-left: 1rem;
+    color: #0070f3;
+  }
+  .header nav a:hover {
+    text-decoration: underline;
+  }
+  
+  .controls {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .controls h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .toggleButton {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    color: white;
+    border-radius: 20px; /* 丸みのあるボタン */
+  }
+  .toggleButton.on {
+    background-color: #4caf50; /* 緑 */
+  }
+  .toggleButton.off {
+    background-color: #f44336; /* 赤 */
+  }
+  
+  .feelingsList h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  .feelingsList ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .feelingItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+  
+  .feelingItem.selected {
+    border-left: 5px solid #0070f3; /* 選択されている感を出す */
+    background-color: #f0f8ff;
+  }
+  
+  .feelingItem span {
+    font-weight: 500;
+  }
+  
+  .buttons button {
+    margin-left: 0.5rem;
+  }
+  
+  .purchaseButton {
+    background-color: #ff9800; /* オレンジ */
+    color: white;
+    border: none;
+  }
+  .purchaseButton:hover {
+    background-color: #f57c00;
+  }

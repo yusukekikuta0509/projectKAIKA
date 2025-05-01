@@ -1,0 +1,101 @@
+/* src/app/app/collector/collector.module.css */
+.container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eaeaea;
+  }
+  .header h1 {
+    margin: 0;
+  }
+  .header nav a {
+    margin-left: 1rem;
+    color: #0070f3;
+  }
+  .header nav a:hover {
+    text-decoration: underline;
+  }
+  
+  .collectionControl,
+  .collectedData,
+  .mapSection,
+  .revenueSection {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  .collectionControl h2,
+  .collectedData h2,
+  .mapSection h2,
+  .revenueSection h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+  }
+  
+  .collectButton {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    border: none;
+    color: white;
+  }
+  .collectButton:not(.collecting) { /* 通常時 */
+    background-color: #4caf50; /* 緑 */
+  }
+  .collectButton:not(.collecting):hover {
+    background-color: #388e3c;
+  }
+  .collectButton.collecting { /* 収集中 */
+    background-color: #f44336; /* 赤 */
+  }
+  .collectButton.collecting:hover {
+    background-color: #d32f2f;
+  }
+  
+  .collectedData div {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mapPlaceholder {
+    width: 100%;
+    height: 300px; /* マップの高さ（仮） */
+    background-color: #e0e0e0; /* グレーの背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #777;
+    border-radius: 4px;
+  }
+  
+  .revenueDisplay {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .revenueDisplay strong {
+    color: #388e3c; /* 収益を緑色で */
+  }
+  
+  .revenueSection button {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+  }
+  .revenueSection button:hover:not(:disabled) {
+    background-color: #005bb5;
+  }
+  .revenueSection button:disabled {
+    background-color: #ccc;
+  }
