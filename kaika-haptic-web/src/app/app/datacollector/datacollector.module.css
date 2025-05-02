@@ -1,0 +1,88 @@
+/* src/app/app/datacollector/datacollector.module.css */
+/* 基本レイアウトは haptic.module.css と共通部分が多い */
+/* .main, .header, .logo, .nav, .navLink, .walletInfo, .walletAddress, .kaikaBalance, .walletButton, */
+/* .gradientBackground, .dotGrid, .contentWrapper, .section は流用または微調整 */
+@import url('../haptic/haptic.module.css');/* hapticのスタイルを一部インポート */
+
+/* データ収集セクション特有のスタイル */
+.collectionSection {
+  text-align: center;
+}
+
+.statusIndicator {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.statusIndicator.idle {
+  color: #aaa;
+}
+.statusIndicator.collecting {
+  color: #ff6b00;
+  font-weight: bold;
+  animation: pulse 1.5s infinite ease-in-out; /* 点滅アニメーション */
+}
+.statusIndicator.collected {
+    color: #28a745; /* 緑色 */
+}
+.statusIndicator.submitting {
+    color: #007bff; /* 青色 */
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.actionButton {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-width: 200px;
+  margin-top: 1rem;
+}
+.actionButton.start {
+  background-color: #28a745; /* 緑 */
+  color: white;
+}
+.actionButton.stop {
+  background-color: #dc3545; /* 赤 */
+  color: white;
+}
+.actionButton.submit {
+  background-color: #007bff; /* 青 */
+  color: white;
+}
+.actionButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.collectedDataInfo {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  color: #ccc;
+}
+
+.submissionStatus {
+  margin-top: 1.5rem;
+  font-weight: 500;
+  color: #eee;
+}
+.submissionStatus.success {
+    color: #28a745;
+}
+.submissionStatus.error {
+    color: #dc3545;
+}

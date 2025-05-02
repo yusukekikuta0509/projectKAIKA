@@ -244,6 +244,103 @@
     animation: spin 1s ease-in-out infinite;
     margin-left: auto; /* 右端に寄せる */
   }
+  /* src/app/app/haptic/haptic.module.css */
+/* ... (前回のCSS) ... */
+
+/* ヘッダー内のウォレット情報 */
+.walletInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .walletAddress {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #ccc;
+  }
+  
+  .kaikaBalance {
+    font-weight: bold;
+    color: #ffcf00; /* KAIKAトークン色 (例) */
+    font-size: 0.9rem;
+  }
+  
+  /* 購入ステータスメッセージ */
+  .statusMessage {
+    padding: 1rem;
+    margin-bottom: 1.5rem; /* リストとの間隔 */
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #eee;
+  }
+  .statusMessage.success {
+      background-color: rgba(40, 167, 69, 0.3);
+      border-color: rgba(40, 167, 69, 0.7);
+      color: #c3e6cb;
+  }
+  .statusMessage.error {
+      background-color: rgba(220, 53, 69, 0.3);
+      border-color: rgba(220, 53, 69, 0.7);
+      color: #f5c6cb;
+  }
+  
+  /* 感覚リストアイテム内の詳細情報 */
+  .feelingItem {
+    /* ... existing styles ... */
+    gap: 1rem; /* 情報とボタンの間のスペース */
+  }
+  
+  .feelingInfo {
+    flex-grow: 1; /* 左側が伸びるように */
+  }
+  
+  .feelingName {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    display: block; /* 改行させる */
+    margin-bottom: 0.3rem;
+  }
+  
+  .feelingDescription {
+    font-size: 0.9rem;
+    color: #bbb;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .feelingPrice {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffcf00; /* 価格の色 */
+  }
+  
+  .feelingItem.owned .feelingPrice {
+      display: none; /* 所有済みなら価格非表示 */
+  }
+  
+  /* ボタンとローダーのコンテナ */
+  .buttons {
+    /* ... existing styles ... */
+    position: relative; /* ローダーの位置基準 */
+    min-width: 120px; /* ボタンやローダーの最低幅 */
+    display: flex;
+    justify-content: flex-end; /* 右寄せ */
+  }
+  
+  .loader {
+    /* ... existing styles ... */
+    /* 位置調整は不要かも */
+  }
+  
+  .purchaseButton.purchasing {
+    /* ... existing styles ... */
+  }
   
   @keyframes spin {
     to { transform: rotate(360deg); }
