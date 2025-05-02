@@ -1,418 +1,155 @@
 /* src/app/app/datacollector/datacollector.module.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap');
 
+/* ─── カラーパレットと基本変数 ─── */
+:root {
+  --kaika-orange: #ff6b00;
+  --kaika-orange-dark: #e65c00;
+  --kaika-orange-glow: rgba(255, 107, 0, 0.7); /* Brighter glow */
+  --kaika-orange-light-glow: rgba(255, 107, 0, 0.4);
+  --kaika-black: #0A0A0A;
+  --kaika-near-black: #111111;
+  --kaika-dark-grey: #1a1a1a;
+  --kaika-mid-grey: #2a2a2a;
+  --kaika-light-grey: #aeaeae;
+  --kaika-white: #f0f0f0;
+  --kaika-accent-cyan: #00ffff;
+  --kaika-accent-cyan-glow: rgba(0, 255, 255, 0.7);
+  --kaika-font-sans: 'Inter', sans-serif;
+  --kaika-font-mono: 'Roboto Mono', monospace;
+  --header-height: 65px;
+}
+
+/* ─── グローバルスタイルリセット ─── */
+:global(*) { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── Main Layout ─── */
 .main {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #0a0a0a;
-  color: #f5f5f5;
-  font-family: 'Inter', sans-serif;
+  display: flex; flex-direction: column; min-height: 100vh;
+  background: var(--kaika-black); color: var(--kaika-light-grey);
+  font-family: var(--kaika-font-sans); overflow: hidden; /* Prevent scrollbars from layout */
 }
 
+/* ─── Header ─── */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255, 107, 0, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  height: var(--header-height); padding: 0 2rem; display: flex; align-items: center;
+  background-color: rgba(16, 16, 16, 0.8); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 107, 0, 0.2); position: sticky; top: 0; z-index: 100;
 }
+.logo { font-size: 1.6rem; font-weight: 800; color: var(--kaika-orange); text-decoration: none; letter-spacing: 1px; display: flex; align-items: center; gap: 0.4rem; transition: transform 0.3s ease; }
+.logoIcon { font-size: 1.1em; opacity: 0.9; }
+.logo:hover { transform: scale(1.03); }
+.nav { display: flex; gap: 1.5rem; margin-left: auto; margin-right: 2rem;}
+.navLink { color: var(--kaika-light-grey); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: color 0.2s ease; padding: 0.5rem 0; position: relative; }
+.navLink:hover { color: var(--kaika-orange); }
+.navLink::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background-color: var(--kaika-orange); transition: width 0.3s ease; }
+.navLink:hover::after { width: 100%; }
+.walletInfo { display: flex; align-items: center; gap: 1rem; }
+.walletAddress { background-color: rgba(255, 107, 0, 0.1); color: var(--kaika-orange); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; font-family: var(--kaika-font-mono); border: 1px solid rgba(255, 107, 0, 0.3); white-space: nowrap; }
+.kaikaBalance { background-color: rgba(255, 255, 255, 0.05); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: var(--kaika-orange); white-space: nowrap; }
+.walletButton {}
+.walletButton :global(.wallet-adapter-button-trigger) { background-color: var(--kaika-orange) !important; color: var(--kaika-black) !important; border: none !important; border-radius: 6px !important; padding: 0.6rem 1rem !important; font-weight: 700 !important; font-size: 0.9rem !important; transition: background-color 0.3s ease, transform 0.1s ease !important; }
+.walletButton :global(.wallet-adapter-button-trigger:hover) { background-color: var(--kaika-orange-dark) !important; transform: scale(1.03); }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #ff6b00;
-  text-decoration: none;
-  letter-spacing: 1px;
-}
-
-.nav {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.navLink {
-  color: #e0e0e0;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-  padding: 0.5rem 0;
-  position: relative;
-}
-
-.navLink:hover {
-  color: #ff6b00;
-}
-
-.navLink::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background-color: #ff6b00;
-  transition: width 0.3s ease;
-}
-
-.navLink:hover::after {
-  width: 100%;
-}
-
-.walletInfo {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.walletAddress {
-  background-color: rgba(255, 107, 0, 0.1);
-  color: #ff6b00;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  border: 1px solid rgba(255, 107, 0, 0.3);
-}
-
-.kaikaBalance {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ff6b00;
-}
-
-.walletButton {
-  background-color: #ff6b00 !important;
-  color: #0a0a0a !important;
-  border: none !important;
-  border-radius: 6px !important;
-  padding: 0.5rem 1rem !important;
-  font-weight: 600 !important;
-  transition: background-color 0.3s ease !important;
-}
-
-.walletButton:hover {
-  background-color: #ff8c3f !important;
-}
-
+/* ─── Content Wrapper & Layout (Map Right, Controls Left) ─── */
 .contentWrapper {
-  flex: 1;
-  display: flex;
-  padding: 2rem;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
+  flex: 1; display: flex; padding: 1.5rem; max-width: 1800px; width: 100%; margin: 0 auto; gap: 1.5rem;
+  align-items: stretch; /* Make columns equal height potentially */
 }
 
-/* Map & Data Collection Container */
-.dashboardContainer {
-  display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: 1.5rem;
-  width: 100%;
-}
-
-/* Map Container */
-.mapContainer {
-  height: calc(100vh - 180px);
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  background-color: #111111;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 107, 0, 0.2);
-}
-
-.mapOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background: radial-gradient(circle at center, transparent 40%, rgba(10, 10, 10, 0.5) 100%);
-  z-index: 10;
-}
-
-.userLocation {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  background-color: #ff6b00;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 20;
-  box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.3);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 107, 0, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 107, 0, 0);
-  }
-}
-
-.pathTrail {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 15;
-  pointer-events: none;
-}
-
-.mapControls {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.mapButton {
-  width: 40px;
-  height: 40px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #0a0a0a;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.2s ease;
-  border: none;
-  font-size: 1.2rem;
-}
-
-.mapButton:hover {
-  background-color: #ff6b00;
-  color: white;
-}
-
-/* Data Collection Panel */
+/* Control Panel (Left Side) */
 .controlPanel {
-  padding: 1.5rem;
-  background-color: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  height: fit-content;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  flex: 1; /* Takes less space */
+  min-width: 340px; max-width: 400px; padding: 1.8rem;
+  backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+  background: rgba(22, 22, 22, 0.85); /* Slightly more opaque */
+  border-radius: 16px; display: flex; flex-direction: column; gap: 1.5rem;
+  height: calc(100vh - var(--header-height) - 3rem); /* Full height minus header/padding */
+  overflow-y: auto;
+  box-shadow: 0 8px 35px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+  border: 1px solid rgba(255, 107, 0, 0.25); /* More visible border */
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+.controlPanel::-webkit-scrollbar { display: none; }
+
+/* Map Container (Right Side) */
+.dashboardContainer { /* Renamed map container */
+  flex: 2.5; /* Takes more space */
+  min-width: 500px;
+  border-radius: 16px;
+  overflow: hidden; /* Important for Canvas */
+  position: relative;
+  background-color: var(--kaika-near-black); /* Fallback BG */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 107, 0, 0.2);
+  height: calc(100vh - var(--header-height) - 3rem); /* Match panel height */
 }
 
-.panelTitle {
-  margin: 0 0 1rem 0;
-  font-size: 1.4rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #ff6b00;
-}
+/* ─── Control Panel Elements ─── */
+.panelTitle { margin: 0 0 0.8rem 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; color: var(--kaika-orange); border-bottom: 1px solid rgba(255, 107, 0, 0.2); padding-bottom: 0.8rem; }
+.panelTitle .panelIcon { width: 22px; height: 22px; opacity: 0.9; }
+.panelTitle .panelIcon path { /* stroke: var(--kaika-orange); */ /* Use fill if needed for Fi icons */ fill: var(--kaika-orange); }
 
-.panelIcon {
-  width: 24px;
-  height: 24px;
-}
+/* Status Card */
+.statusCard { padding: 1rem 1.2rem; border-radius: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; gap: 1rem; transition: border-left-color 0.3s ease, background-color 0.3s ease; }
+.statusDot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; transition: background-color 0.3s ease, box-shadow 0.3s ease; }
+.statusCard.idle .statusDot { background-color: var(--kaika-grey); box-shadow: 0 0 8px rgba(120, 120, 120, 0.5); }
+.statusCard.collecting .statusDot { background-color: var(--kaika-orange); animation: pulse-dot 1.5s infinite; }
+.statusCard.collected .statusDot { background-color: var(--kaika-accent-cyan); box-shadow: 0 0 10px var(--kaika-accent-cyan-glow); }
+.statusCard.submitting .statusDot { background-color: #5fa9f8; box-shadow: 0 0 10px rgba(95, 169, 248, 0.7); }
+@keyframes pulse-dot { 0% { box-shadow: 0 0 0 0 var(--kaika-orange-glow); } 70% { box-shadow: 0 0 0 8px rgba(255, 107, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0); } }
+.statusLabel { font-size: 0.75rem; color: var(--kaika-light-grey); text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
+.statusValue { font-size: 1.05rem; font-weight: 600; color: var(--kaika-white); margin-left: auto; font-family: var(--kaika-font-mono); }
 
-.statusCard {
-  padding: 1rem;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border-left: 3px solid #666;
-}
+/* Terrain Selector (Integrated) */
+.terrainSelectorIntegrated { padding-top: 1rem; border-top: 1px solid rgba(255, 107, 0, 0.15); }
+.terrainSelectorIntegrated .terrainTitle { font-size: 0.8rem; margin-bottom: 1rem; color: var(--kaika-light-grey); text-transform: uppercase; letter-spacing: 0.8px; }
+.terrainSelectorIntegrated .terrainOptions { display: grid; grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); gap: 0.8rem; }
+.terrainSelectorIntegrated .terrainButton { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 8px; padding: 0.8rem 0.5rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; transition: all 0.2s ease; }
+.terrainSelectorIntegrated .terrainButton:hover { transform: translateY(-2px) scale(1.03); background: rgba(255, 107, 0, 0.1); border-color: rgba(255, 107, 0, 0.3); }
+.terrainSelectorIntegrated .terrainButton.selected { background: rgba(255, 107, 0, 0.2); border-color: var(--kaika-orange); box-shadow: 0 0 12px var(--kaika-orange-light-glow); transform: translateY(0) scale(1); }
+.terrainSelectorIntegrated .terrainIcon { font-size: 1.5rem; margin-bottom: 0.1rem; transition: color 0.2s ease; color: var(--kaika-light-grey); }
+.terrainSelectorIntegrated .terrainButton.selected .terrainIcon { color: var(--kaika-orange); }
+.terrainSelectorIntegrated .terrainLabel { font-size: 0.65rem; font-weight: 500; color: var(--kaika-white); opacity: 0.9; text-align: center; }
 
-.statusCard.idle {
-  border-left-color: #666;
-}
+/* Collection Info */
+.collectionInfo { display: grid; grid-template-columns: auto 1fr; gap: 0.7rem 1rem; align-items: center; border-top: 1px solid rgba(255, 107, 0, 0.15); padding-top: 1.5rem; }
+.infoItem { display: contents; }
+.infoLabel { color: var(--kaika-light-grey); font-size: 0.8rem; font-weight: 500; text-align: right; display: flex; align-items: center; gap: 0.3rem;}
+.infoLabel svg { width: 12px; height: 12px; opacity: 0.7; }
+.infoValue { color: var(--kaika-white); font-weight: 500; font-size: 0.9rem; font-family: var(--kaika-font-mono); text-align: left; }
+.infoValue.highlight { color: var(--kaika-orange); font-weight: 600; }
 
-.statusCard.collecting {
-  border-left-color: #ff6b00;
-  background: rgba(255, 107, 0, 0.1);
-  animation: pulse-background 2s infinite;
-}
+/* Stats Container (Earned KAIKA) */
+.statsContainer { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 1rem; }
+.statCard { padding: 0.8rem; background-color: rgba(0, 0, 0, 0.25); border-radius: 8px; text-align: center; border: 1px solid rgba(255, 107, 0, 0.1); }
+.statValue { font-size: 1.3rem; font-weight: 700; color: var(--kaika-orange); margin-bottom: 0.2rem; font-family: var(--kaika-font-mono); }
+.statLabel { font-size: 0.75rem; color: var(--kaika-light-grey); text-transform: uppercase; letter-spacing: 0.5px; }
 
-.statusCard.collected {
-  border-left-color: #28a745;
-  background: rgba(40, 167, 69, 0.1);
-}
+/* Action buttons with Neon/Glow effect */
+.actionButton { padding: 0.9rem 1.5rem; font-size: 1rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-top: 1rem; text-transform: uppercase; letter-spacing: 0.5px; position: relative; overflow: hidden; z-index: 1; }
+.actionButton svg { width: 18px; height: 18px; }
+.actionButton::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; transition: background 0.3s ease, box-shadow 0.3s ease; }
+.actionButton::after { content: ''; position: absolute; inset: 1px; border-radius: 7px; background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0)); opacity: 0; transition: opacity 0.3s ease; }
+.actionButton:hover::after { opacity: 1; }
+.actionButton.start { color: var(--kaika-black); }
+.actionButton.start::before { background: linear-gradient(45deg, var(--kaika-orange), var(--kaika-orange-dark)); box-shadow: 0 0 15px var(--kaika-orange-light-glow), 0 0 25px var(--kaika-orange-light-glow); }
+.actionButton.start:hover:not(:disabled)::before { background: linear-gradient(45deg, var(--kaika-orange-dark), #ff851b); box-shadow: 0 0 20px var(--kaika-orange-glow), 0 0 35px var(--kaika-orange-glow); }
+.actionButton.stop { color: var(--kaika-white); }
+.actionButton.stop::before { background: var(--kaika-mid-grey); border: 1px solid #555; }
+.actionButton.stop:hover:not(:disabled)::before { background: var(--kaika-grey); }
+.actionButton.submit { color: var(--kaika-black); }
+.actionButton.submit::before { background: linear-gradient(45deg, var(--kaika-accent-cyan), #00c4c4); box-shadow: 0 0 15px var(--kaika-accent-cyan-glow), 0 0 25px var(--kaika-accent-cyan-glow); }
+.actionButton.submit:hover:not(:disabled)::before { background: linear-gradient(45deg, #0ff, #00dede); box-shadow: 0 0 20px var(--kaika-accent-cyan-glow), 0 0 35px var(--kaika-accent-cyan-glow); }
+.actionButton.processing { color: var(--kaika-light-grey); cursor: default; }
+.actionButton.processing::before { background: var(--kaika-dark-grey); box-shadow: none; }
+.spinner { animation: spin 1s linear infinite; }
+.actionButton:disabled { background: var(--kaika-dark-grey) !important; color: var(--kaika-grey) !important; cursor: not-allowed; opacity: 0.6; box-shadow: none !important; transform: none !important; }
+.actionButton:disabled::before, .actionButton:disabled::after { display: none; }
+.actionButton:disabled:hover { transform: none !important; }
 
-.statusCard.submitting {
-  border-left-color: #007bff;
-  background: rgba(0, 123, 255, 0.1);
-}
-
-@keyframes pulse-background {
-  0% {
-    background: rgba(255, 107, 0, 0.05);
-  }
-  50% {
-    background: rgba(255, 107, 0, 0.2);
-  }
-  100% {
-    background: rgba(255, 107, 0, 0.05);
-  }
-}
-
-.statusLabel {
-  font-size: 0.85rem;
-  color: #888;
-  margin-bottom: 0.3rem;
-}
-
-.statusValue {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #eee;
-}
-
-.collectionInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.infoItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.infoLabel {
-  color: #aaa;
-  font-size: 0.9rem;
-}
-
-.infoValue {
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.infoValue.highlight {
-  color: #ff6b00;
-  font-weight: 600;
-}
-
-.actionButton {
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.actionButton.start {
-  background-color: #28a745;
-  color: white;
-}
-
-.actionButton.stop {
-  background-color: #dc3545;
-  color: white;
-}
-
-.actionButton.submit {
-  background-color: #ff6b00;
-  color: white;
-}
-
-.actionButton:disabled {
-  background-color: #333;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.actionButton.start:hover:not(:disabled) {
-  background-color: #218838;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.actionButton.stop:hover:not(:disabled) {
-  background-color: #c82333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.actionButton.submit:hover:not(:disabled) {
-  background-color: #e25c00;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.submissionStatus {
-  margin-top: 1rem;
-  padding: 0.8rem;
-  font-size: 0.95rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  text-align: center;
-}
-
-.submissionStatus.success {
-  color: #28a745;
-  background-color: rgba(40, 167, 69, 0.1);
-}
-
-.submissionStatus.error {
-  color: #dc3545;
-  background-color: rgba(220, 53, 69, 0.1);
-}
-
-.statsContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin-top: 0.5rem;
-}
-
-.statCard {
-  padding: 0.8rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.statValue {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #ff6b00;
-  margin-bottom: 0.2rem;
-}
-
-.statLabel {
-  font-size: 0.8rem;
-  color: #aaa;
-}
+/* Submission status message */
+.submissionStatus { margin-top: 1rem; padding: 0.8rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.04); border-radius: 6px; text-align: center; border: 1px solid transparent; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.submissionStatus.success { color: var(--mint-green); background-color: rgba(0, 255, 163, 0.1); border-color: rgba(0, 255, 163, 0.3); }
+.submissionStatus.error { color: #ff4d4d; background-color: rgba(255, 77, 77, 0.1); border-color: rgba(255, 77, 77, 0.3); }
+.submissionStatus svg { width: 16px; height: 16px; }

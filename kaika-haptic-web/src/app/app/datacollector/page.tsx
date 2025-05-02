@@ -1,615 +1,431 @@
 // src/app/app/datacollector/page.tsx
 'use client';
-import { useState, useEffect, useRef } from 'react';
+// useRef を react からインポートするのを忘れないように
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import Link from 'next/link';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
+
+// --- Import Icons ---
+import { FaMountain, FaTree, FaUmbrellaBeach, FaWater, FaQuestion } from 'react-icons/fa';
+import { FiPlay, FiSquare, FiUploadCloud, FiCheckCircle, FiAlertCircle, FiLoader, FiMapPin, FiDatabase, FiClock, FiTrendingUp, FiCompass, FiRepeat, FiMaximize } from 'react-icons/fi';
+import { SiSolana } from 'react-icons/si';
+
+// --- Import CSS ---
 import styles from './datacollector.module.css';
 
-// Collection state type definition
+// --- Import 3D Map Viewer (Client-side only) ---
+const MapViewer3D = dynamic(() => import('@/components/MapViewer3D'), { // ★★★ パスを確認 ★★★
+    ssr: false,
+    loading: () => <div style={{height: '100%', background: 'var(--kaika-near-black, #111)', display: 'flex', flexDirection: 'column', alignItems:'center', justifyContent:'center', color: 'var(--kaika-light-grey, #aaa)', borderRadius: '16px'}}>
+                       <FiLoader size={24} className={styles.spinner} style={{marginBottom: '1rem'}}/>
+                       Loading 3D Environment...
+                   </div>
+});
+
+// --- Dynamically import WalletMultiButton ---
+const WalletMultiButtonDynamic = dynamic(
+  async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+  { ssr: false }
+);
+
+// ============================================================
+// Type Definitions
+// ============================================================
 type CollectionState = 'idle' | 'collecting' | 'collected' | 'submitting';
+type Position = { x: number; y: number; };
+interface Terrain {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number | string; className?: string }>;
+}
 
-// Position type definition
-type Position = {
-  x: number;
-  y: number;
-};
+// ============================================================
+// Constants & Data
+// ============================================================
+const KAIKA_REWARD_PER_SECOND = 0.3;
+const KAIKA_REWARD_PER_DISTANCE = 0.5;
+const MIN_KAIKA_REWARD = 5;
+const CURRENT_LOCATION = "Shibuya Crossing";
+const NETWORK_NAME = "Devnet";
 
-// Tokyo landmark data (relative coordinates on map)
+// Tokyo landmark data - findNearestLandmarkで使用
 const TOKYO_LANDMARKS = [
-  { name: "Shinjuku", x: 30, y: 35 },
-  { name: "Shibuya", x: 40, y: 50 },
-  { name: "Tokyo Station", x: 60, y: 45 },
-  { name: "Ikebukuro", x: 25, y: 20 },
-  { name: "Ueno", x: 65, y: 25 },
-  { name: "Akihabara", x: 58, y: 35 },
-  { name: "Shinagawa", x: 55, y: 70 },
-  { name: "Roppongi", x: 50, y: 55 },
+  { name: "Shinjuku", x: 30, y: 35 }, { name: "Shibuya", x: 40, y: 50 },
+  { name: "Tokyo Stn", x: 60, y: 45 }, { name: "Ikebukuro", x: 25, y: 20 },
+  { name: "Ueno", x: 65, y: 25 }, { name: "Akihabara", x: 58, y: 35 },
+  { name: "Shinagawa", x: 55, y: 70 }, { name: "Roppongi", x: 50, y: 55 },
 ];
 
+// Terrain Data
+const terrains: Terrain[] = [
+  { id: 'city',     label: 'City',     icon: FiTrendingUp },
+  { id: 'forest',   label: 'Forest',   icon: FaTree },
+  { id: 'mountain', label: 'Mountain', icon: FaMountain },
+  { id: 'beach',    label: 'Beach',    icon: FaUmbrellaBeach },
+  { id: 'water',    label: 'Water',    icon: FaWater },
+  { id: 'other',    label: 'Other',    icon: FaQuestion },
+];
+
+// ============================================================
+// Helper Function
+// ============================================================
+const truncateAddress = (address: string | null | undefined, startLength = 4, endLength = 4): string => {
+    if (!address) return '';
+    if (address.length <= startLength + endLength) return address;
+    return `${address.substring(0, startLength)}...${address.substring(address.length - endLength)}`;
+};
+
+
+// ============================================================
+// DataCollectorPage Component
+// ============================================================
 export default function DataCollectorPage() {
   // --- Wallet Hooks ---
   const { publicKey, connected } = useWallet();
 
   // --- State ---
   const [collectionState, setCollectionState] = useState<CollectionState>('idle');
-  const [simulatedDataType, setSimulatedDataType] = useState<string | null>(null);
+  const [selectedTerrain, setSelectedTerrain] = useState<string | null>(null);
   const [collectionStartTime, setCollectionStartTime] = useState<number | null>(null);
-  const [collectionDuration, setCollectionDuration] = useState<number>(0); // seconds
+  const [collectionDuration, setCollectionDuration] = useState<number>(0);
   const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
   const [earnedKaika, setEarnedKaika] = useState<number | null>(null);
   const [mockKaikaBalance, setMockKaikaBalance] = useState(125);
   const [dataTransferAnimation, setDataTransferAnimation] = useState(false);
-  
-  // --- Map related state ---
-  const [userPosition, setUserPosition] = useState<Position>({ x: 45, y: 40 }); // Initial position near Tokyo center
-  const [pathHistory, setPathHistory] = useState<Position[]>([]);
-  const [currentLocation, setCurrentLocation] = useState<string>("Tokyo Area");
-  const [dataCollected, setDataCollected] = useState<number>(0); // Amount of data collected
-  const [totalDistance, setTotalDistance] = useState<number>(0); // Total distance moved
-  const [mapRotation, setMapRotation] = useState<number>(0); // 3D effect for map
-  const [mapTilt, setMapTilt] = useState<number>(20); // Tilt effect for 3D view
-  
-  // Refs for map size and canvas
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const pathCanvasRef = useRef<HTMLCanvasElement>(null);
-  const mapSvgRef = useRef<SVGSVGElement>(null);
-  
-  // Timer ref for movement simulation
+  const [userLogicPosition, setUserLogicPosition] = useState<Position>({ x: 50, y: 50 });
+  const [currentLocationName, setCurrentLocationName] = useState<string>(CURRENT_LOCATION);
+  const [dataCollected, setDataCollected] = useState<number>(0);
+  const [totalDistance, setTotalDistance] = useState<number>(0);
+  const [simulatedDataType, setSimulatedDataType] = useState<string | null>(null);
+
+  // --- Refs ---
   const movementTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const previousPositionRef = useRef<Position>(userLogicPosition);
+  // ★★★ currentDirectionRef の定義を追加 ★★★
+  const currentDirectionRef = useRef({ x: 0, y: 1 }); // 初期方向 (例: Y軸プラス方向、つまり3D空間のZ軸プラス方向)
 
-  // --- Initialization ---
-  useEffect(() => {
-    // Initialize canvas
-    updatePathCanvas();
-    
-    // Add 3D perspective effect on mouse move
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!mapContainerRef.current) return;
-      
-      const rect = mapContainerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      
-      const maxRotation = 1.5; // Limit rotation degree
-      const rotationX = ((e.clientY - centerY) / rect.height) * maxRotation;
-      const rotationY = ((centerX - e.clientX) / rect.width) * maxRotation;
-      
-      if (mapSvgRef.current) {
-        mapSvgRef.current.style.transform = `perspective(1200px) rotateX(${rotationX + mapTilt}deg) rotateY(${rotationY}deg)`;
-      }
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      // Cleanup
-      if (movementTimerRef.current) {
-        clearInterval(movementTimerRef.current);
-      }
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [mapTilt]);
+   // --- Memoized Values ---
+   const selectedTerrainLabel = useMemo(() => {
+       return terrains.find(t => t.id === selectedTerrain)?.label ?? 'Environment';
+   }, [selectedTerrain]);
 
-  // Update path canvas
-  const updatePathCanvas = () => {
-    if (!pathCanvasRef.current || pathHistory.length < 2) return;
-    
-    const canvas = pathCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Match canvas size to container
-    if (mapContainerRef.current) {
-      canvas.width = mapContainerRef.current.clientWidth;
-      canvas.height = mapContainerRef.current.clientHeight;
-    }
-    
-    // Draw path with glow effect
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Create glow effect
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = "rgba(255, 107, 0, 0.6)";
-    
-    ctx.beginPath();
-    ctx.moveTo(pathHistory[0].x * canvas.width / 100, pathHistory[0].y * canvas.height / 100);
-    
-    for (let i = 1; i < pathHistory.length; i++) {
-      ctx.lineTo(pathHistory[i].x * canvas.width / 100, pathHistory[i].y * canvas.height / 100);
-    }
-    
-    ctx.strokeStyle = '#ff6b00';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    
-    // Draw data points along the path
-    pathHistory.forEach((point, index) => {
-      if (index % 3 === 0) { // Draw only some points for better performance
-        ctx.beginPath();
-        ctx.arc(
-          point.x * canvas.width / 100, 
-          point.y * canvas.height / 100, 
-          2, 0, Math.PI * 2
-        );
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.fill();
-      }
-    });
-  };
 
-  // Update canvas when path history changes
-  useEffect(() => {
-    updatePathCanvas();
-  }, [pathHistory]);
-
-  // Simulate periodic position updates during collection
-  useEffect(() => {
-    if (collectionState === 'collecting') {
-      // Clear existing timer
-      if (movementTimerRef.current) {
-        clearInterval(movementTimerRef.current);
-      }
-      
-      // Start new movement simulation
-      movementTimerRef.current = setInterval(() => {
-        // Move in a slightly random direction
-        const moveX = (Math.random() - 0.5) * 3;
-        const moveY = (Math.random() - 0.5) * 3;
-        
-        // Calculate new position (keep within map boundaries)
-        const newX = Math.max(0, Math.min(100, userPosition.x + moveX));
-        const newY = Math.max(0, Math.min(100, userPosition.y + moveY));
-        
-        // Update position
-        setUserPosition({ x: newX, y: newY });
-        
-        // Add to path history
-        setPathHistory(prev => [...prev, { x: newX, y: newY }]);
-        
-        // Calculate distance moved
-        const distance = Math.sqrt(moveX * moveX + moveY * moveY);
-        setTotalDistance(prev => prev + distance);
-        
-        // Update data collection amount
-        setDataCollected(prev => prev + Math.floor(Math.random() * 10) + 5);
-        
-        // Find nearest landmark and update current location
-        const nearestLandmark = findNearestLandmark(newX, newY);
-        setCurrentLocation(nearestLandmark);
-        
-        // Slightly adjust map tilt for dynamic effect
-        setMapTilt(prev => prev + (Math.random() - 0.5) * 0.1);
-      }, 1000);
-    } else {
-      // Clear timer when collection stops
-      if (movementTimerRef.current) {
-        clearInterval(movementTimerRef.current);
-        movementTimerRef.current = null;
-      }
-    }
-    
-    return () => {
-      if (movementTimerRef.current) {
-        clearInterval(movementTimerRef.current);
-      }
-    };
-  }, [collectionState, userPosition]);
-
-  // Find nearest landmark
-  const findNearestLandmark = (x: number, y: number): string => {
+   // --- Helper: Find nearest landmark ---
+   const findNearestLandmark = useCallback((x: number, y: number): string => {
     let minDistance = Infinity;
     let nearestName = "Tokyo Area";
-    
     TOKYO_LANDMARKS.forEach(landmark => {
-      const distance = Math.sqrt(
-        Math.pow(x - landmark.x, 2) + Math.pow(y - landmark.y, 2)
-      );
-      
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestName = landmark.name;
-      }
+      const distance = Math.sqrt(Math.pow(x - landmark.x, 2) + Math.pow(y - landmark.y, 2));
+      if (distance < minDistance) { minDistance = distance; nearestName = landmark.name; }
     });
-    
-    // Return "Area" if no landmark is close
     return minDistance < 15 ? `${nearestName} District` : "Tokyo Area";
-  };
+  }, []); // Empty dependency array is correct here
 
-  // Reset map
-  const resetMap = () => {
-    setUserPosition({ x: 45, y: 40 });
-    setPathHistory([]);
-    setCurrentLocation("Tokyo Area");
-    setMapTilt(20);
-    updatePathCanvas();
-  };
 
-  // --- Handlers ---
-  const handleStartCollection = () => {
-    if (!connected) {
-      alert("Please connect your wallet to start data collection.");
-      return;
+  // --- Effects ---
+
+  // Simulate user movement
+  useEffect(() => {
+    if (collectionState === 'collecting') {
+      if (movementTimerRef.current) clearInterval(movementTimerRef.current);
+      movementTimerRef.current = setInterval(() => {
+        setUserLogicPosition(prevPos => {
+          // --- 歩行風移動ロジック ---
+          // 1. 時々、方向を少しランダムに変える
+          if (Math.random() < 0.1) { // 10%の確率で方向転換
+            const angleChange = (Math.random() - 0.5) * (Math.PI / 4); // 最大45度変更
+            // currentDirectionRef を使用
+            const currentAngle = Math.atan2(currentDirectionRef.current.y, currentDirectionRef.current.x);
+            const newAngle = currentAngle + angleChange;
+            currentDirectionRef.current = { x: Math.cos(newAngle), y: Math.sin(newAngle) };
+          }
+
+          // 2. 現在の方向に一定速度で進む
+          const speed = 0.7 + (Math.random() - 0.5) * 0.2; // 少し変動する速度
+          // currentDirectionRef を使用
+          const moveX = currentDirectionRef.current.x * speed;
+          const moveY = currentDirectionRef.current.y * speed;
+
+          // 3. 新しい位置を計算 (境界チェック)
+          const newX = Math.max(0, Math.min(100, prevPos.x + moveX));
+          const newY = Math.max(0, Math.min(100, prevPos.y + moveY));
+          const newPos = { x: newX, y: newY };
+
+          // 4. 統計情報を更新
+          const distance = Math.sqrt(moveX * moveX + moveY * moveY) / 5;
+          setTotalDistance(prevDist => prevDist + distance);
+          setDataCollected(prevData => prevData + Math.floor(Math.random() * 5) + 1);
+          setCurrentLocationName(findNearestLandmark(newX, newY));
+
+          // 前回の位置を更新 (次フレームの方向計算用)
+          previousPositionRef.current = prevPos;
+
+          return newPos; // 新しい位置を返す
+        });
+      }, 800); // 更新間隔
+    } else {
+      if (movementTimerRef.current) { clearInterval(movementTimerRef.current); movementTimerRef.current = null; }
     }
-    
-    // Set collection start state
+    return () => { if (movementTimerRef.current) clearInterval(movementTimerRef.current); };
+  }, [collectionState, findNearestLandmark]); // findNearestLandmark dependency
+
+  // Timer effect for collection duration display
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (collectionState === 'collecting' && collectionStartTime) {
+      interval = setInterval(() => { setCollectionDuration(Math.floor((Date.now() - collectionStartTime) / 1000)); }, 1000);
+    } else if (collectionState !== 'collecting' && interval) {
+      clearInterval(interval);
+    }
+     if (collectionState === 'idle') { setCollectionDuration(0); }
+    return () => { if (interval) clearInterval(interval); };
+  }, [collectionState, collectionStartTime]);
+
+
+  // --- Action Handlers ---
+  const handleTerrainSelect = (terrainId: string) => { if (collectionState === 'idle') { setSelectedTerrain(terrainId); } };
+
+  const handleStartCollection = () => {
+    if (!connected) { alert("Please connect your wallet first."); return; }
+    if (!selectedTerrain) { alert("Please select a terrain type first."); return; }
+    if (collectionState !== 'idle') return;
+    const terrainLabel = terrains.find(t => t.id === selectedTerrain)?.label ?? 'Generic';
     setCollectionState('collecting');
     setCollectionStartTime(Date.now());
-    setSimulatedDataType(getRandomDataType());
-    setCollectionDuration(0);
-    setSubmissionStatus(null);
-    setEarnedKaika(null);
-    
-    // Reset data statistics
-    setDataCollected(0);
-    setTotalDistance(0);
-    
-    // Reset position history and add current point
-    setPathHistory([userPosition]);
-    
-    console.log("Data collection started...");
+    setSimulatedDataType(`${terrainLabel} Scan`);
+    setCollectionDuration(0); setSubmissionStatus(null); setEarnedKaika(null);
+    setDataCollected(0); setTotalDistance(0);
+    previousPositionRef.current = userLogicPosition; // 開始時の位置を記録
+    // アバターの位置はリセットしない
+    console.log(`Data collection started for ${terrainLabel}...`);
   };
 
   const handleStopCollection = () => {
     if (collectionState !== 'collecting' || !collectionStartTime) return;
-    
-    // Calculate collection time
     const duration = Math.floor((Date.now() - collectionStartTime) / 1000);
     setCollectionDuration(duration);
     setCollectionState('collected');
     setCollectionStartTime(null);
-    
-    console.log(`Data collection stopped. Duration: ${duration} seconds`);
+    if (movementTimerRef.current) { clearInterval(movementTimerRef.current); movementTimerRef.current = null; }
+    const reward = Math.max(MIN_KAIKA_REWARD, Math.floor(duration * KAIKA_REWARD_PER_SECOND + totalDistance * KAIKA_REWARD_PER_DISTANCE));
+    setEarnedKaika(reward);
+    console.log(`Collection stopped. Duration: ${duration}s, Distance: ${totalDistance.toFixed(2)}, Data: ${dataCollected}KB, Earned: ${reward} KAIKA`);
   };
 
   const handleSubmitData = () => {
-    if (collectionState !== 'collected' || !connected) return;
-
+    if (collectionState !== 'collected' || !connected || earnedKaika === null) return;
     setCollectionState('submitting');
-    setSubmissionStatus("Preparing data upload...");
-    setDataTransferAnimation(true);
-    console.log("Submitting data...");
-
-    // Simulate data upload & transaction
+    setSubmissionStatus("Packaging data...");
+    setDataTransferAnimation(true); console.log("Submitting data...");
     setTimeout(() => {
-      setSubmissionStatus("Uploading data to IPFS (simulation)...");
+      setSubmissionStatus("Uploading securely...");
       setTimeout(() => {
-        setSubmissionStatus("Please approve transaction in your wallet...");
+        setSubmissionStatus("Confirm transaction...");
         setTimeout(() => {
-          // Success scenario
-          // Calculate reward based on time and distance
-          const reward = Math.max(5, Math.floor(collectionDuration * 0.3 + totalDistance * 0.5));
-          setEarnedKaika(reward);
-          setMockKaikaBalance(prev => prev + reward);
-          setSubmissionStatus(`Success! You've earned ${reward} KAIKA!`);
-          setCollectionState('idle');
-          setCollectionDuration(0);
-          setSimulatedDataType(null);
-          setDataTransferAnimation(false);
+          setMockKaikaBalance(prev => prev + earnedKaika);
+          setSubmissionStatus(`Success! +${earnedKaika} KAIKA`);
+          setCollectionState('idle'); setDataTransferAnimation(false);
+          setTimeout(() => { // Clear stats after showing success
+            setSelectedTerrain(null); setSimulatedDataType(null); setEarnedKaika(null);
+            setSubmissionStatus(null); setDataCollected(0); setTotalDistance(0);
+          }, 2500);
           console.log("Data successfully submitted.");
-        }, 2500);
+        }, 2000 + Math.random() * 1000);
       }, 1500);
     }, 1000);
+    setTimeout(() => setDataTransferAnimation(false), 5000); // Animation fallback stop
   };
 
-  // Get random data type
-  const getRandomDataType = () => {
-    const types = ['Urban Sidewalk', 'Park Pathway', 'Office Flooring', 'Wooden Floor', 'Tiled Surface'];
-    return types[Math.floor(Math.random() * types.length)];
-  };
 
-  // Timer effect during collection
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    
-    if (collectionState === 'collecting' && collectionStartTime) {
-      interval = setInterval(() => {
-        setCollectionDuration(Math.floor((Date.now() - collectionStartTime) / 1000));
-      }, 1000);
-    } else if (interval) {
-      clearInterval(interval);
+  // --- Render Action Button ---
+  const renderActionButton = useCallback(() => {
+    let buttonText = ''; let clickHandler: () => void = () => {}; let buttonStyle = '';
+    let key = collectionState; let isDisabled = false; let Icon = FiPlay;
+
+    switch (collectionState) {
+      case 'idle':
+        buttonText = connected ? 'Start Collection' : 'Connect Wallet'; clickHandler = handleStartCollection;
+        buttonStyle = styles.start; key = 'idle'; isDisabled = !connected || !selectedTerrain; Icon = FiPlay;
+        break;
+      case 'collecting':
+        buttonText = `Stop (${collectionDuration}s)`; clickHandler = handleStopCollection;
+        buttonStyle = styles.stop; key = 'collecting'; Icon = FiSquare;
+        break;
+      case 'collected':
+        buttonText = `Submit & Claim ${earnedKaika ?? '-'} KAIKA`; clickHandler = handleSubmitData;
+        buttonStyle = styles.submit; key = 'collected'; isDisabled = !connected || earnedKaika === null; Icon = FiUploadCloud;
+        break;
+      case 'submitting':
+        buttonText = 'Processing...'; clickHandler = () => {}; buttonStyle = styles.processing;
+        key = 'submitting'; isDisabled = true; Icon = FiLoader;
+        break;
+      default: return null;
     }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [collectionState, collectionStartTime]);
+    return ( <motion.button key={key} onClick={clickHandler} disabled={isDisabled} className={`${styles.actionButton} ${buttonStyle}`} whileHover={!isDisabled ? { scale: 1.03, y: -2, transition: { duration: 0.1 } } : {}} whileTap={!isDisabled ? { scale: 0.97, transition: { duration: 0.1 } } : {}} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} title={collectionState === 'idle' && connected && !selectedTerrain ? "Select environment first" : ""} > <Icon className={collectionState === 'submitting' ? styles.spinner : ''} size="18" /> {buttonText} </motion.button> );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collectionState, collectionDuration, connected, earnedKaika, selectedTerrain]); // Dependencies ok
 
-  // --- Rendering ---
+
+  // --- Calculate User Direction for Avatar ---
+  const userDirection = useMemo(() => {
+      const dx = userLogicPosition.x - previousPositionRef.current.x;
+      const dz = userLogicPosition.y - previousPositionRef.current.y; // Logic Y -> World Z
+      const length = Math.sqrt(dx * dx + dz * dz);
+      // Return normalized direction or (0,0) if no movement
+      return length > 0.01 ? { x: dx / length, z: dz / length } : { x: 0, z: 0 };
+  }, [userLogicPosition]); // Depends only on userLogicPosition
+
+
+  // --- Component Render ---
   return (
     <div className={styles.main}>
       {/* Header */}
       <header className={styles.header}>
-        <Link href="/" className={styles.logo}>
-          <span className={styles.logoIcon}>◈</span>
-          <span className={styles.logoText}>KAIKA</span>
-        </Link>
-        <nav className={styles.nav}>
-          <Link href="/app/haptic" className={styles.navLink}>Haptic Select</Link>
-          <Link href="/" className={styles.navLink}>Main Page</Link>
-        </nav>
+        <Link href="/" className={styles.logo}> <span className={styles.logoIcon}>◈</span> <span className={styles.logoText}>KAIKA</span> </Link>
+        <nav className={styles.nav}> <Link href="/app/haptic" className={styles.navLink}>Haptic Select</Link> </nav>
         <div className={styles.walletInfo}>
-          {connected && publicKey && (
-            <span className={styles.walletAddress}>
-              {publicKey.toBase58().substring(0, 4)}...{publicKey.toBase58().substring(publicKey.toBase58().length - 4)}
-            </span>
-          )}
+          {connected && publicKey && ( <span className={styles.walletAddress} title={publicKey.toBase58()}> {truncateAddress(publicKey.toBase58())} </span> )}
           <span className={styles.kaikaBalance}>◈ {mockKaikaBalance} KAIKA</span>
-          <WalletMultiButton className={styles.walletButton} />
+          <WalletMultiButtonDynamic className={styles.walletButton} />
         </div>
       </header>
 
       {/* Content */}
       <div className={styles.contentWrapper}>
-        <div className={styles.dashboardContainer}>
-          {/* Map Section */}
-          <div className={styles.mapContainer} ref={mapContainerRef}>
-            {/* Map Layer - Tokyo Map (rendered with advanced SVG) */}
-            <svg 
-              width="100%" 
-              height="100%" 
-              viewBox="0 0 100 100" 
-              preserveAspectRatio="none"
-              className={styles.mapSvg}
-              ref={mapSvgRef}
-            >
-              {/* Background with gradient */}
-              <defs>
-                <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#0a0d1c" />
-                  <stop offset="100%" stopColor="#151b30" />
-                </linearGradient>
-                <pattern id="gridPattern" width="10" height="10" patternUnits="userSpaceOnUse">
-                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(100,149,237,0.1)" strokeWidth="0.5" />
-                </pattern>
-                
-                {/* Glow filter for landmarks */}
-                <filter id="landmarkGlow" height="300%" width="300%" x="-75%" y="-75%">
-                  <feMorphology operator="dilate" radius="1" in="SourceAlpha" result="thicken" />
-                  <feGaussianBlur in="thicken" stdDeviation="2" result="blurred" />
-                  <feFlood floodColor="#4a7bff" result="glowColor" />
-                  <feComposite in="glowColor" in2="blurred" operator="in" result="softGlow" />
-                  <feMerge>
-                    <feMergeNode in="softGlow" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              
-              <rect width="100" height="100" fill="url(#mapGradient)" />
-              <rect width="100" height="100" fill="url(#gridPattern)" />
-              
-              {/* City glow effect */}
-              <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(100,149,237,0.1)" strokeWidth="20" opacity="0.1" />
-              
-              {/* Tokyo's major areas */}
-              {TOKYO_LANDMARKS.map((landmark, index) => (
-                <g key={index} filter="url(#landmarkGlow)">
-                  <circle 
-                    cx={landmark.x} 
-                    cy={landmark.y} 
-                    r="4" 
-                    fill="rgba(74,123,255,0.2)" 
-                    stroke="rgba(74,123,255,0.5)" 
-                    strokeWidth="0.5" 
-                  />
-                  <text 
-                    x={landmark.x} 
-                    y={landmark.y} 
-                    textAnchor="middle" 
-                    fill="rgba(255,255,255,0.8)" 
-                    fontSize="2" 
-                    dy="-6"
-                    fontFamily="'Inter', sans-serif"
-                  >
-                    {landmark.name}
-                  </text>
-                </g>
-              ))}
-              
-              {/* Road network with enhanced styling */}
-              <line x1="30" y1="35" x2="40" y2="50" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-              <line x1="40" y1="50" x2="50" y2="55" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-              <line x1="50" y1="55" x2="60" y2="45" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-              <line x1="60" y1="45" x2="58" y2="35" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-              <line x1="58" y1="35" x2="65" y2="25" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-              <line x1="30" y1="35" x2="25" y2="20" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-              <line x1="25" y1="20" x2="65" y2="25" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-              <line x1="60" y1="45" x2="55" y2="70" stroke="rgba(100,149,237,0.2)" strokeWidth="0.5" />
-            </svg>
-            
-            {/* Canvas for path drawing */}
-            <canvas ref={pathCanvasRef} className={styles.pathTrail}></canvas>
-            
-            {/* User location */}
-            <div 
-              className={`${styles.userLocation} ${collectionState === 'collecting' ? styles.pulsing : ''}`}
-              style={{ 
-                left: `${userPosition.x}%`, 
-                top: `${userPosition.y}%` 
-              }}
-            >
-              <div className={styles.locationRing}></div>
-            </div>
-            
-            {/* Data transfer animation */}
-            {dataTransferAnimation && (
-              <div className={styles.dataTransferAnimation}>
-                <div className={styles.dataParticle}></div>
-                <div className={styles.dataParticle}></div>
-                <div className={styles.dataParticle}></div>
-              </div>
-            )}
-            
-            {/* Map overlay effect */}
-            <div className={styles.mapOverlay}>
-              <div className={styles.scanline}></div>
-            </div>
-            
-            {/* Map controls */}
-            <div className={styles.mapControls}>
-              <button 
-                className={`${styles.mapButton} ${styles.resetButton}`}
-                onClick={resetMap}
-                title="Reset Map"
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none">
-                  <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.39 0 4.68.94 6.36 2.63L12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <button 
-                className={`${styles.mapButton} ${styles.centerButton}`}
-                onClick={() => setUserPosition({ x: 45, y: 40 })}
-                title="Center Map"
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none">
-                  <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-                  <line x1="12" y1="8" x2="12" y2="16" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="8" y1="12" x2="16" y2="12" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          {/* Control Panel */}
-          <div className={styles.controlPanel}>
-            <h2 className={styles.panelTitle}>
-              <svg className={styles.panelIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#4a7bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="#4a7bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="#4a7bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              DATA COLLECTOR
-            </h2>
-            
-            <div className={`${styles.statusCard} ${styles[collectionState]}`}>
-              <div className={styles.statusDot}></div>
-              <div className={styles.statusLabel}>STATUS</div>
-              <div className={styles.statusValue}>
-                {collectionState === 'idle' && 'STANDBY'}
-                {collectionState === 'collecting' && 'COLLECTING DATA'}
-                {collectionState === 'collected' && 'COLLECTION COMPLETE'}
-                {collectionState === 'submitting' && 'PROCESSING'}
-              </div>
-            </div>
-            
-            <div className={styles.collectionInfo}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>LOCATION</span>
-                <span className={`${styles.infoValue} ${styles.highlight}`}>{currentLocation}</span>
-              </div>
-              
-              {simulatedDataType && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>DATA TYPE</span>
-                  <span className={styles.infoValue}>{simulatedDataType}</span>
+
+         {/* Control Panel (Left Side) */}
+          <motion.div
+            className={styles.controlPanel}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <h2 className={styles.panelTitle}> <FiDatabase className={styles.panelIcon} /> Data Collector </h2>
+            {/* Status Card */}
+            <motion.div layout className={`${styles.statusCard} ${styles[collectionState]}`}>
+                <div className={styles.statusDot}></div>
+                <div className={styles.statusLabel}>Status</div>
+                <div className={styles.statusValue}>
+                  {collectionState === 'idle' && 'Standby'}
+                  {collectionState === 'collecting' && 'Collecting'}
+                  {collectionState === 'collected' && 'Complete'}
+                  {collectionState === 'submitting' && 'Processing'}
                 </div>
+            </motion.div>
+
+            {/* Terrain Selector */}
+             <AnimatePresence>
+             {collectionState === 'idle' && (
+                 <motion.div
+                    key="terrain-selector-integrated"
+                    className={styles.terrainSelectorIntegrated}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto', transition: { delay: 0.1 } }}
+                    exit={{ opacity: 0, height: 0 }}
+                 >
+                     <h3 className={styles.terrainTitle}>Select Data Environment</h3>
+                     <div className={styles.terrainOptions}>
+                         {terrains.map((terrain) => (
+                            <motion.button
+                                key={terrain.id}
+                                className={`${styles.terrainButton} ${selectedTerrain === terrain.id ? styles.selected : ''}`}
+                                onClick={() => handleTerrainSelect(terrain.id)}
+                                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}
+                                transition={{ duration: 0.1 }}
+                            >
+                                <terrain.icon size={20} className={styles.terrainIcon} />
+                                <span className={styles.terrainLabel}>{terrain.label}</span>
+                            </motion.button>
+                         ))}
+                     </div>
+                 </motion.div>
+             )}
+            </AnimatePresence>
+
+            {/* Collection Info */}
+            <motion.div layout className={styles.collectionInfo}>
+              <div className={styles.infoItem}> <span className={styles.infoLabel}><FiMapPin size={12}/>Location</span> <span className={`${styles.infoValue} ${styles.highlight}`}>{currentLocationName}</span> </div>
+              {(selectedTerrain || collectionState !== 'idle') && (
+                <div className={styles.infoItem}> <span className={styles.infoLabel}><FiDatabase size={12}/>Type</span> <span className={styles.infoValue}>{simulatedDataType ?? 'N/A'}</span> </div>
               )}
-              
+              <AnimatePresence>
               {collectionState !== 'idle' && (
-                <>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>ELAPSED TIME</span>
-                    <span className={styles.infoValue}>{collectionDuration}s</span>
-                  </div>
-                  
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>COLLECTED DATA</span>
-                    <span className={styles.infoValue}>{dataCollected.toLocaleString()} KB</span>
-                  </div>
-                  
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>DISTANCE</span>
-                    <span className={styles.infoValue}>{totalDistance.toFixed(2)} km</span>
-                  </div>
-                </>
+                <motion.div
+                    layout key="stats"
+                    initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                    style={{display: 'contents'}} // Use contents for grid layout
+                >
+                   <div className={styles.infoItem}> <span className={styles.infoLabel}><FiClock size={12}/>Time</span> <span className={styles.infoValue}>{collectionDuration}s</span> </div>
+                   <div className={styles.infoItem}> <span className={styles.infoLabel}><FiTrendingUp size={12}/>Data</span> <span className={styles.infoValue}>{dataCollected.toLocaleString()} KB</span> </div>
+                   <div className={styles.infoItem}> <span className={styles.infoLabel}><FiCompass size={12}/>Distance</span> <span className={styles.infoValue}>{totalDistance.toFixed(2)} km</span> </div>
+                </motion.div>
               )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Earned KAIKA Stats */}
+            <AnimatePresence>
+            {earnedKaika !== null && collectionState === 'idle' && ( // Show only after submission completed
+              <motion.div
+                layout key="earned-stats"
+                className={styles.statsContainer}
+                initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+              >
+                <div className={styles.statCard}> <div className={styles.statValue}>{earnedKaika}</div> <div className={styles.statLabel}>KAIKA Earned</div> </div>
+                <div className={styles.statCard}> <div className={styles.statValue}>{mockKaikaBalance}</div> <div className={styles.statLabel}>New Balance</div> </div>
+              </motion.div>
+            )}
+            </AnimatePresence>
+
+            {/* Action buttons container */}
+            <div style={{ marginTop: 'auto', paddingTop: '1rem' }}> {/* Push button to bottom */}
+                <AnimatePresence mode="wait">
+                    {renderActionButton()}
+                </AnimatePresence>
             </div>
-            
-            {earnedKaika !== null && (
-              <div className={styles.statsContainer}>
-                <div className={styles.statCard}>
-                  <div className={styles.statValue}>{earnedKaika}</div>
-                  <div className={styles.statLabel}>EARNED KAIKA</div>
-                </div>
-                <div className={styles.statCard}>
-                  <div className={styles.statValue}>{mockKaikaBalance}</div>
-                  <div className={styles.statLabel}>BALANCE</div>
-                </div>
-              </div>
-            )}
-            
-            {/* Action buttons */}
-            {collectionState === 'idle' && (
-              <button 
-                onClick={handleStartCollection} 
-                className={`${styles.actionButton} ${styles.start}`} 
-                disabled={!connected}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M16 12L10 16V8L16 12Z" fill="currentColor"/>
-                </svg>
-                START DATA COLLECTION
-              </button>
-            )}
-            
-            {collectionState === 'collecting' && (
-              <button 
-                onClick={handleStopCollection} 
-                className={`${styles.actionButton} ${styles.stop}`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <rect x="9" y="9" width="6" height="6" fill="currentColor"/>
-                </svg>
-                STOP COLLECTION ({collectionDuration}s)
-              </button>
-            )}
-            
-            {collectionState === 'collected' && (
-              <button 
-                onClick={handleSubmitData} 
-                className={`${styles.actionButton} ${styles.submit}`} 
-                disabled={!connected}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                SUBMIT DATA & CLAIM KAIKA
-              </button>
-            )}
-            
-            {collectionState === 'submitting' && (
-              <button 
-                className={`${styles.actionButton} ${styles.processing}`} 
-                disabled
-              >
-                <svg className={styles.spinner} width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 18V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.3"/>
-                  <path d="M4.93 4.93L7.76 7.76" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
-                  <path d="M16.24 16.24L19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.2"/>
-                  <path d="M2 12H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
-                  <path d="M18 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.1"/>
-                  <path d="M4.93 19.07L7.76 16.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
-                  <path d="M16.24 7.76L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
-                </svg>
-                PROCESSING...
-              </button>
-            )}
-            
+
             {/* Submission status message */}
-            {submissionStatus && (
-              <div className={`${styles.submissionStatus} ${submissionStatus.includes('Success') ? styles.success : submissionStatus.includes('failed') ? styles.error : ''}`}>
-                {submissionStatus}
-              </div>
+             <AnimatePresence>
+             {submissionStatus && collectionState !== 'idle' && ( // Show status only during/after submission, before idle
+              <motion.div
+                 key="submission-status"
+                 className={`${styles.submissionStatus} ${submissionStatus.includes('Success') ? styles.success : submissionStatus.includes('failed') ? styles.error : ''}`}
+                 initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+              >
+                 {/* Icons based on status */}
+                 {submissionStatus.includes('Success') ? <FiCheckCircle size={14}/> : submissionStatus.includes('failed') ? <FiAlertCircle size={14}/> : <FiLoader size={14} className={styles.spinner}/>}
+                 <span style={{marginLeft: '0.5rem'}}>{submissionStatus}</span>
+              </motion.div>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+           </AnimatePresence>
+          </motion.div> {/* End Control Panel */}
+
+          {/* 3D Map Viewer Section (Right Side) */}
+          <motion.div
+            className={styles.dashboardContainer} // Container for the 3D view
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+             {/* Suspense for R3F loading state */}
+             <Suspense fallback={
+                 <div style={{height: '100%', background: 'var(--kaika-near-black, #111)', display: 'flex', flexDirection: 'column', alignItems:'center', justifyContent:'center', color: 'var(--kaika-light-grey, #aaa)', borderRadius: '16px'}}>
+                     <FiLoader size={24} className={styles.spinner} style={{marginBottom: '1rem'}}/>
+                     Loading 3D Environment...
+                 </div>
+             }>
+                 {/* Pass collection state and direction to MapViewer3D */}
+                 <MapViewer3D
+                    userPosition={userLogicPosition}
+                    collectionState={collectionState}
+                    userDirection={userDirection} // Pass calculated direction
+                 />
+             </Suspense>
+          </motion.div>
+
+        </div> {/* End Content Wrapper */}
+      </div> 
+  ); // End of component return
+} // End of component function
