@@ -1,22 +1,29 @@
-/* src/app/layout.tsx  ── サーバーコンポーネント (← "use client" を付けない) */
+// src/app/layout.tsx
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { SolanaWalletCtx } from "./providers/WalletProvider"; // Import the provider
+import '@solana/wallet-adapter-react-ui/styles.css';
 
-import '@solana/wallet-adapter-react-ui/styles.css';   // ★ ここで全体読み込み
-import { Inter } from 'next/font/google';
-import { SolanaWalletCtx } from './providers/WalletProvider';
+const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: 'KAIKA Haptic App',
-  description: 'Feel the ground with Haptic Insoles'
+export const metadata: Metadata = {
+  title: "KAIKA Haptic App",
+  description: "Feel the ground with Haptic Insoles",
 };
 
-const inter = Inter({ subsets: ['latin'] });
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body className={inter.className}>
-        {/* ここから先がクライアント領域 */}
-        <SolanaWalletCtx>{children}</SolanaWalletCtx>
+        {/* Wrap the entire application with SolanaProviders */}
+        <SolanaWalletCtx>
+          {children}
+        </SolanaWalletCtx>
       </body>
     </html>
   );

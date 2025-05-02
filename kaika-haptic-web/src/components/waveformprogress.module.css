@@ -1,0 +1,50 @@
+/* src/components/waveformprogress.module.css */
+/* --- 基本変数 (他のCSSファイルで定義されている前提、またはここで定義) --- */
+/* このファイルが他の場所で再利用される可能性を考慮し、
+   依存する変数はここで :root 定義しておくのが安全 */
+   :root {
+    --orange: #ff6b00;
+    --white: #ffffff;
+    --font-mono: 'Roboto Mono', monospace;
+  }
+  
+  .waveformContainer {
+    width: 80%;
+    max-width: 400px; /* 最大幅 */
+    margin: 1rem auto 0.5rem auto; /* マージン調整 */
+    position: relative; /* テキストオーバーレイのため */
+    height: 100px; /* SVGの高さに合わせる */
+  }
+  
+  .waveformPath {
+    fill: var(--orange); /* 基本色 */
+    stroke: none; /* 線は不要 */
+    mix-blend-mode: screen; /* 重なりを明るく */
+    opacity: 0.5; /* 透明度 */
+  }
+  
+  .path1 {
+    opacity: 0.6;
+  }
+  .path2 {
+    opacity: 0.4;
+    transform: translateX(5px); /* 少しずらす */
+  }
+  .path3 {
+    opacity: 0.2;
+    transform: translateX(-5px); /* 逆方向にずらす */
+  }
+  
+  .timerOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 1.4rem; /* 少し大きく */
+    font-weight: 700;
+    color: var(--white);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6); /* 影を少し強く */
+    pointer-events: none; /* 下のSVG操作を妨げない */
+  }

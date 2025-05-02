@@ -1,347 +1,988 @@
 /* src/app/app/haptic/haptic.module.css */
 
-/* メインコンテナ */
-.main {
-    min-height: 100vh;
-    padding: 0rem 4rem 4rem 4rem; /* 上部はヘッダー分空ける */
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* 中央寄せ */
-    color: #fff;
+/* ─── 基本変数 ─── */
+:root {
+    --orange: #ff6b00;
+    --dark-orange: #e65c00;
+    --light-orange: #ffeadb;
+    --black: #0A0A0A;
+    --near-black: #161616;
+    --grey: #505050;
+    --light-grey: #b0b0b0;
+    --white: #ffffff;
+    --cyan-glow: rgba(0, 255, 255, 0.7);
+    --cyan-border: rgba(0, 255, 255, 0.5);
+    --mint-green: #00ffa3;
+    --usdc-green: #2775CA; /* USDCの公式色に近い青 */
+    --usdc-green-light: #5fa9f8; /* USDCホバー用 */
+    --haptic-intensity: 0.5; /* ハプティック強度変数 (JSで更新想定) */
+    --haptic-color: rgba(255, 107, 0, .15); /* ハプティック色変数 (JSで更新想定) */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+    --header-height: 70px; /* ヘッダーの高さを変数化 */
   }
   
-  /* ヘッダー (トップページと共通のデザインを想定) */
-  .header {
+  /* ─── Main Layout & Backgrounds ─── */
+  .main {
+    background-color: var(--black);
+    color: var(--white);
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    position: relative; /* For fixed background elements */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+  }
+  
+  /* 背景動画コンテナ */
+  .backgroundVideoContainer {
+    position: fixed;
+    inset: 0;
+    z-index: -3; /*一番後ろ*/
+    overflow: hidden;
+    background-color: var(--black); /* Video load fallback */
+  }
+  .backgroundVideo {
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 0; /* 上下のパディング */
-    margin-bottom: 4rem; /* ヘッダー下のマージン */
-    position: sticky; /* ヘッダーを追従させる場合 */
+    height: 100%;
+    object-fit: cover; /* Cover the entire area */
+    opacity: 0; /* Hidden by default */
+    transition: opacity 1.2s ease-in-out; /* Fade transition */
+    position: absolute;
     top: 0;
-    z-index: 100;
-    /* background: rgba(0, 0, 0, 0.5); /* 背景を少し暗くする場合 */
-    /* backdrop-filter: blur(10px); */
+    left: 0;
+  }
+  .backgroundVideo.visible {
+    opacity: 0.18; /* Visible opacity */
+  }
+  
+  /* ドットグリッド背景 */
+  .dotGrid {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(var(--grey) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.05;
+    z-index: -2; /* Behind content, above video */
+    pointer-events: none;
+  }
+  
+  /* パーティクルエフェクト */
+  .particleContainer {
+    position: fixed;
+    inset: 0;
+    z-index: -1; /* Behind content */
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .particleEffect {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: var(--haptic-color, rgba(255, 107, 0, .15));
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(2px);
+    animation: particle-float 15s infinite ease-in-out alternate; /* Added alternate direction */
+    transform-origin: center center;
+    transition: background-color 0.5s ease;
+  }
+  /* Active state controlled by JS adding/removing the class or inline style */
+  .particleEffect.active {
+     opacity: calc(var(--haptic-intensity, 0.5) * 0.7 + 0.1); /* More visible when active */
+     animation-duration: calc(20s / (var(--haptic-intensity, 0.5) + 0.5)); /* Faster with higher intensity */
+  }
+  /* Example with pseudo-elements for more particles */
+  .particleEffect::before, .particleEffect::after {
+      content: '';
+      position: absolute;
+      width: 100%; height: 100%;
+      background: inherit; border-radius: inherit;
+      opacity: inherit; filter: inherit; animation: inherit;
+  }
+  .particleEffect::before { animation-delay: -7s; left: 25%; top: 60%; width: 4px; height: 4px; }
+  .particleEffect::after { animation-delay: -12s; left: 75%; top: 30%; width: 6px; height: 6px; }
+  
+  @keyframes particle-float {
+    0% { transform: translateY(0vh) translateX(0vw) scale(0.8); opacity: 0.2; }
+    50% { transform: translateY(-50vh) translateX(10vw) scale(1.2); opacity: 0.8; }
+    100% { transform: translateY(0vh) translateX(-10vw) scale(0.8); opacity: 0.2; }
+  }
+  
+  
+  /* ─── Header ─── */
+  .header {
+    height: var(--header-height);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(10, 10, 10, 0.75);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
   
   .logo {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #fff;
-    text-decoration: none; /* Linkコンポーネント用 */
-  }
-  
-  .nav {
     display: flex;
-    gap: 1.5rem;
-  }
-  
-  .navLink {
-    color: #ccc;
-    text-decoration: none;
-    font-size: 1rem;
-    transition: color 0.2s ease;
-  }
-  
-  .navLink:hover {
-    color: #fff;
-  }
-  
-  .walletButton > button { /* WalletMultiButtonのスタイル調整 */
-    background-color: #ff6b00 !important; /* !important で強制上書き */
-    color: #fff !important;
-    border: none !important;
-    padding: 0.6rem 1.2rem !important;
-    border-radius: 8px !important;
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: background-color 0.2s ease !important;
-  }
-  
-  .walletButton > button:hover {
-    background-color: #e05e00 !important;
-  }
-  
-  
-  /* 背景 (トップページから流用) */
-  .gradientBackground {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+    align-items: center;
     height: 100%;
-    z-index: -2;
-    pointer-events: none;
+    padding: 0.5rem 0;
+  }
+  .logo img {
+      width: auto;
+      height: 80%;
+      max-height: 40px;
+      object-fit: contain;
+      transition: filter 0.3s ease;
+  }
+  .logo:hover img {
+     filter: drop-shadow(0 0 5px var(--orange));
   }
   
-  .dotGrid {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.5;
-  }
-  
-  /* コンテンツセクション */
-  .contentWrapper {
-    width: 100%;
-    max-width: 800px; /* コンテンツの最大幅 */
+  /* ウォレット情報エリア */
+  .walletInfo {
     display: flex;
-    flex-direction: column;
-    gap: 3rem; /* セクション間のギャップ */
-  }
-  
-  .section {
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 2rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .section h2 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    color: #eee;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 0.8rem;
-  }
-  
-  /* コントロールセクション */
-  .controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* 中央揃え */
+    align-items: center;
     gap: 1rem;
   }
-  
-  .toggleButton {
-    padding: 0.8rem 2rem;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border: none;
+  .balanceContainer {
+    display: flex;
+    gap: 1rem;
+    padding: 0.4rem 0.8rem;
+    background-color: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
+  }
+  .balanceItem {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .balanceLabel {
+    font-size: 0.7rem;
+    color: var(--light-grey);
+    text-transform: uppercase;
+  }
+  .balanceValue { /* USDC残高 */
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--usdc-green-light); /* USDCカラー適用 */
+  }
+  .kaikaBalance {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--orange);
+  }
+  .walletAddress {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    color: var(--light-grey);
+    cursor: help;
+    transition: background-color 0.2s ease;
+  }
+  .walletAddress:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+  }
+  .connectPrompt {
+      font-size: 0.85rem;
+      color: var(--light-grey);
+      margin-right: 1rem;
+  }
+  /* Wallet Multi Button スタイル */
+  .walletButton { /* WalletMultiButton ラッパー */ }
+  .walletButton :global(.wallet-adapter-button) {
+      background: var(--near-black) !important;
+      font-weight: 600 !important;
+      border-radius: 8px !important;
+      padding: 0.6rem 1rem !important;
+      color: #e1e1e1 !important;
+      transition: background-color 0.2s ease !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .walletButton :global(.wallet-adapter-button:hover) {
+      background: #333 !important;
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  /* デバイス接続ボタン */
+  .connectDeviceButton {
+    background: none;
+    border: 1px solid var(--light-grey);
+    color: var(--light-grey);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    min-width: 150px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .connectDeviceButton:hover:not(:disabled) {
+    border-color: var(--mint-green);
+    color: var(--mint-green);
+    background-color: rgba(0, 255, 163, 0.1);
+  }
+  .connectDeviceButton.connected {
+    border-color: var(--mint-green);
+    color: var(--mint-green);
+  }
+  .connectDeviceButton.connecting {
+      cursor: default;
+      opacity: 0.7;
+      border-color: var(--grey);
+      color: var(--grey);
+  }
+  .connectDeviceButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-color: var(--grey);
+      color: var(--grey);
+  }
+  .connectionSpinner {
+      border: 2px solid rgba(0, 255, 163, 0.3);
+      border-top: 2px solid var(--mint-green);
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  
+  /* ─── Content Wrapper & Layout ─── */
+  .contentWrapper {
+    padding: 2rem 1.5rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap; /* Enable wrapping */
+  }
+  
+  /* ─── Left Panel: Controls + Visualizer ─── */
+  .controlPanel {
+    flex: 1 1 400px; /* Flex properties */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: calc(var(--header-height) + 2rem);
+    align-self: flex-start;
+    max-width: 450px;
+    height: calc(100vh - var(--header-height) - 4rem);
+    overflow-y: auto;
+    /* Hide scrollbar */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .controlPanel::-webkit-scrollbar {
+      display: none;
+  }
+  
+  /* Section Base Style */
+  .section {
+      background: rgba(22, 22, 22, 0.7);
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--white);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+  }
+  
+  /* Haptic Controls Section */
+  .controlsGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .controlItem {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+  }
+  .sliderLabel {
+      font-size: 0.85rem;
+      color: var(--light-grey);
+      font-weight: 500;
+  }
+  .slider {
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+  }
+  .slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--orange);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(255, 107, 0, 0.5);
+  }
+  .slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: var(--orange);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+       box-shadow: 0 0 5px rgba(255, 107, 0, 0.5);
+  }
+  .slider:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+  }
+  .slider:disabled::-webkit-slider-thumb {
+      background: var(--grey);
+       box-shadow: none;
+  }
+  .slider:disabled::-moz-range-thumb {
+      background: var(--grey);
+       box-shadow: none;
+  }
+  .sliderValue {
+      font-size: 0.8rem;
+      color: var(--light-grey);
+      text-align: right;
+      font-family: var(--font-mono);
+  }
+  
+  /* Visualizer Section */
+  .visualizer {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+  }
+  .visualizerContent {
+      margin-top: 1rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+  }
+  .placeholderText {
+      color: var(--light-grey);
+      font-style: italic;
+      text-align: center;
+      margin: auto;
+      font-size: 0.9rem;
+  }
+  
+  /* Feeling Details in Visualizer */
+  .feelingDetails {
+      margin-bottom: 1.5rem;
+  }
+  .feelingTitle {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+  }
+  .feelingNameLarge {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--white);
+  }
+  .feelingCategoryTag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      color: var(--black);
+  }
+  .feelingCategoryTag.nature { background-color: rgba(76,175,80,.8); }
+  .feelingCategoryTag.urban { background-color: rgba(33,150,243,.8); }
+  .feelingCategoryTag.abstract { background-color: rgba(156,39,176,.8); }
+  
+  .feelingDescriptionLarge {
+      font-size: 0.9rem;
+      color: var(--light-grey);
+      line-height: 1.5;
+  }
+  
+  /* Attributes Grid in Visualizer */
+  .attributesGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+  }
+  .attributeItem {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+  }
+  .attributeLabel {
+      font-size: 0.8rem;
+      color: var(--light-grey);
+      width: 70px;
+      text-align: right;
+      flex-shrink: 0; /* Prevent label shrinking */
+  }
+  .attributeBar {
+      flex-grow: 1;
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+  }
+  .attributeFill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), var(--dark-orange));
+      border-radius: 4px;
+      transition: width 0.5s ease-out;
+  }
+  .temperatureFill {
+      /* Inline style sets color */
+  }
+  .attributeValue {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      color: var(--white);
+      width: 20px;
+      text-align: right;
+      flex-shrink: 0; /* Prevent value shrinking */
+  }
+  
+  /* Playback Controls */
+  .playbackControls {
+    margin-top: 1.5rem;
     text-align: center;
   }
-  
-  .toggleButton.on {
-    background-color: #ff6b00;
-    color: white;
+  .playButton {
+    background: var(--orange);
+    color: var(--black);
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .playButton:hover:not(:disabled) {
+    background: var(--dark-orange);
+    transform: scale(1.05);
+  }
+  .playButton.playing {
+    background: var(--grey);
+    color: var(--white);
+  }
+  .playButton.playing:hover:not(:disabled) {
+      background: #666;
+  }
+  .playButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important; /* Disable transform on hover */
+      background: var(--grey) !important; /* Ensure disabled bg color */
   }
   
-  .toggleButton.off {
-    background-color: #555;
-    color: #ccc;
+  
+  /* Haptic Zones */
+  .hapticZones {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      height: 10px;
+  }
+  .zone {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .zone.active {
+      background-color: var(--orange);
+      box-shadow: 0 0 8px var(--orange);
   }
   
-  /* 感覚リストセクション */
-  .feelingsList ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  /* Device Status */
+  .deviceStatus {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--light-grey);
+  }
+  .statusIndicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .statusIndicator.connected {
+      background-color: var(--mint-green);
+      box-shadow: 0 0 5px var(--mint-green);
+  }
+  .statusIndicator.disconnected {
+      background-color: var(--grey);
+  }
+  .statusText { /* unchanged */ }
+  .transmittingText {
+      margin-left: 0.5rem;
+      font-style: italic;
+      opacity: 0.8;
+  }
+  
+  /* ─── Right Panel: Marketplace / Portfolio / Info ─── */
+  .contentPanel {
+    flex: 2 1 500px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 2rem;
+  }
+  /* Purchase Status Message */
+  .statusMessage {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: -0.5rem; /* Overlap slightly with section below */
+      border: 1px solid transparent;
+      text-align: center;
+  }
+  .success {
+      background-color: rgba(0, 255, 163, 0.1);
+      border-color: rgba(0, 255, 163, 0.5);
+      color: var(--mint-green);
+  }
+  .error {
+      background-color: rgba(255, 77, 77, 0.1);
+      border-color: rgba(255, 77, 77, 0.5);
+      color: #ff4d4d;
+  }
+  .pending {
+      background-color: rgba(33, 150, 243, 0.1);
+      border-color: rgba(33, 150, 243, 0.5);
+      color: #5fa9f8;
   }
   
-  .feelingItem {
+  /* Section Header (for Portfolio, Marketplace, etc.) */
+  .sectionHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .sectionHeader h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--white);
+  }
+  /* Toggle Button for Portfolio/History */
+  .toggleViewButton {
+    background: none;
+    border: 1px solid var(--light-grey);
+    color: var(--light-grey);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .toggleViewButton:hover {
+    border-color: var(--white);
+    color: var(--white);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Category Filters */
+  .categoryFilters {
+      display: flex;
+      gap: 0.5rem;
+      /* margin-bottom: 1.5rem; Positioned in header now */
+      flex-wrap: wrap;
+  }
+  .categoryButton {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--light-grey);
+      padding: 0.4rem 1rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+  }
+  .categoryButton:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--white);
+  }
+  .categoryButton.active {
+      background-color: var(--orange);
+      border-color: var(--orange);
+      color: var(--black);
+      font-weight: 600;
+  }
+  
+  
+  /* Feelings Section (Marketplace / Portfolio uses this base) */
+  .section.feelingsSection {
+    background: rgba(22, 22, 22, 0.5);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  /* Grid Layout */
+  .feelingsGrid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+  .feelingGridItem {
+    background: var(--near-black);
+    border-radius: 12px;
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; /* Added border-color */
+    position: relative;
+    display: flex;
+    flex-direction: column;
   }
-  
-  .feelingItem.selected {
-    background-color: rgba(255, 107, 0, 0.2);
-    border-color: rgba(255, 107, 0, 0.5);
+  .feelingGridItem:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   }
+  /* Selected state for owned items */
+  .feelingGridItem.selected {
+      border-color: var(--orange);
+      box-shadow: 0 0 15px rgba(255, 107, 0, 0.4);
+  }
+  .feelingGridItem.owned { /* Can add specific owned styles */ }
+  .feelingGridItem.notOwned { /* Can add specific not owned styles */ }
+  /* Category border */
+  .feelingGridItem.nature { border-left: 4px solid rgba(76,175,80,.7); }
+  .feelingGridItem.urban { border-left: 4px solid rgba(33,150,243,.7); }
+  .feelingGridItem.abstract { border-left: 4px solid rgba(156,39,176,.7); }
   
-  .feelingItem span {
-    font-size: 1.1rem;
-    color: #eee;
+  .feelingContent {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures button is at bottom */
+  }
+  .feelingInfo {
+      margin-bottom: 1rem;
+  }
+  .feelingHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+  }
+  .feelingName {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+  }
+  .feelingDescription {
+      font-size: 0.85rem;
+      color: var(--light-grey);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+      /* flex-grow: 1; Removed to allow price/button to be at bottom */
+  }
+  .feelingMetrics {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--light-grey);
+      margin-top: 0.5rem; /* Space above metrics */
+  }
+  .metric { display: flex; gap: 0.3rem; align-items: baseline;}
+  .metricLabel { font-weight: 500; }
+  .metricValue { font-family: var(--font-mono); color: var(--white); }
+  .feelingPrice {
+      font-weight: 700;
+      color: var(--usdc-green-light); /* Consistent USDC color */
+      margin-top: 0.5rem;
+      text-align: right;
   }
   
   .buttons {
+    margin-top: auto; /* Push to bottom */
+    padding-top: 1rem;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.8rem;
+    min-height: 40px;
+  }
+  .loader {
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-top: 3px solid var(--white);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
   }
   
-  .feelingItem button {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-    min-width: 100px; /* ボタン幅を揃える */
-    text-align: center;
+  /* Select Button (Action Button) */
+  .actionButton {
+      background: #333;
+      color: var(--light-grey);
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      width: 100%;
   }
-  
-  .feelingItem button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  .actionButton:hover:not(:disabled) {
+      background: #444;
+      color: var(--white);
   }
-  
-  .feelingItem button:not(:disabled):hover {
-    opacity: 0.8;
+  .actionButton.selected {
+      background: var(--orange);
+      color: var(--black);
+      cursor: default;
   }
-  
-  /* Select Button */
-  .feelingItem button:not(.purchaseButton) {
-    background-color: #333;
-    color: #eee;
-    border: 1px solid #555;
+  .actionButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
   }
-  .feelingItem button:not(.purchaseButton):disabled {
-      background-color: #444;
-      color: #888;
-  }
-  .feelingItem.selected button:not(.purchaseButton) {
-    background-color: #ff6b00;
-    color: white;
-    border: 1px solid #ff6b00;
-  }
-  
   
   /* Purchase Button */
   .purchaseButton {
-    background-color: #007bff; /* 例: 青色 */
-    color: white;
+    background: var(--usdc-green); /* Consistent USDC color */
+    color: var(--white);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    width: 100%;
   }
   .purchaseButton:hover:not(:disabled) {
-    background-color: #0056b3;
+    background: var(--usdc-green-light);
   }
   .purchaseButton.purchasing {
-      background-color: #5a6268; /* 処理中 */
+      opacity: 0.7;
       cursor: default;
   }
-  
-  /* ローディングインジケーター */
-  .loader {
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: #ff6b00;
-    animation: spin 1s ease-in-out infinite;
-    margin-left: auto; /* 右端に寄せる */
+  .purchaseButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: var(--grey);
   }
-  /* src/app/app/haptic/haptic.module.css */
-/* ... (前回のCSS) ... */
+  
+  /* NFT Badge */
+  .nftBadge {
+      position: absolute;
+      top: 0.7rem;
+      right: 0.7rem;
+      background: linear-gradient(45deg, var(--cyan-glow), var(--mint-green));
+      color: var(--black);
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      cursor: help;
+  }
+  
+  /* Transaction History View */
+  .transactionHistory {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+  }
+  .transactionList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+  }
+  .transactionItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 1rem;
+  }
+  .transactionItem:last-child {
+      border-bottom: none;
+  }
+  .transactionInfo {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+  }
+  .transactionName {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--white);
+  }
+  .transactionDate {
+      font-size: 0.75rem;
+      color: var(--light-grey);
+  }
+  .transactionDetails {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-align: right;
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+      justify-content: flex-end;
+  }
+  .transactionAmount {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--usdc-green-light); /* Consistent USDC color */
+      font-family: var(--font-mono);
+  }
+  .transactionHash {
+      font-size: 0.75rem;
+      color: var(--light-grey);
+      font-family: var(--font-mono);
+      text-decoration: none;
+      transition: color 0.2s ease;
+  }
+  .transactionHash:hover {
+      color: var(--cyan-glow);
+  }
+  .transactionStatus {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      white-space: nowrap; /* Prevent wrapping */
+  }
+  .transactionStatus.confirmed { background-color: rgba(0, 255, 163, 0.2); color: var(--mint-green); }
+  .transactionStatus.pending { background-color: rgba(33, 150, 243, 0.2); color: #5fa9f8; }
+  .transactionStatus.failed { background-color: rgba(255, 77, 77, 0.2); color: #ff4d4d; }
+  .noTransactions {
+      text-align: center;
+      color: var(--light-grey);
+      font-style: italic;
+      padding: 2rem 0;
+  }
+  
+  /* Premium Section */
+  .section.premiumSection {
+      margin-top: 1rem;
+  }
+  .premiumBanner {
+      background: linear-gradient(45deg, rgba(156,39,176,.2), rgba(0, 255, 255, 0.1));
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(156,39,176,.5);
+  }
+  .premiumBanner h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--white);
+      font-size: 1.1rem;
+  }
+  .premiumBanner p {
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: var(--light-grey);
+  }
+  .waitlistButton {
+      background: var(--white);
+      color: var(--black);
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+  .waitlistButton:hover {
+      transform: scale(1.05);
+      background-color: #eee;
+  }
+  
+  /* Contract Info Section */
+  .section.contractInfo { /* unchanged */ }
+  .contractGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+  }
+  .contractItem {
+      background-color: rgba(255, 255, 255, 0.03);
+      padding: 0.8rem;
+      border-radius: 8px;
+  }
+  .contractLabel {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--light-grey);
+      margin-bottom: 0.2rem;
+  }
+  .contractValue {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--white);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
 
-/* ヘッダー内のウォレット情報 */
-.walletInfo {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .walletAddress {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: #ccc;
-  }
-  
-  .kaikaBalance {
-    font-weight: bold;
-    color: #ffcf00; /* KAIKAトークン色 (例) */
-    font-size: 0.9rem;
-  }
-  
-  /* 購入ステータスメッセージ */
-  .statusMessage {
-    padding: 1rem;
-    margin-bottom: 1.5rem; /* リストとの間隔 */
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 500;
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #eee;
-  }
-  .statusMessage.success {
-      background-color: rgba(40, 167, 69, 0.3);
-      border-color: rgba(40, 167, 69, 0.7);
-      color: #c3e6cb;
-  }
-  .statusMessage.error {
-      background-color: rgba(220, 53, 69, 0.3);
-      border-color: rgba(220, 53, 69, 0.7);
-      color: #f5c6cb;
-  }
-  
-  /* 感覚リストアイテム内の詳細情報 */
-  .feelingItem {
-    /* ... existing styles ... */
-    gap: 1rem; /* 情報とボタンの間のスペース */
-  }
-  
-  .feelingInfo {
-    flex-grow: 1; /* 左側が伸びるように */
-  }
-  
-  .feelingName {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #fff;
-    display: block; /* 改行させる */
-    margin-bottom: 0.3rem;
-  }
-  
-  .feelingDescription {
-    font-size: 0.9rem;
-    color: #bbb;
-    margin: 0 0 0.5rem 0;
-  }
-  
-  .feelingPrice {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #ffcf00; /* 価格の色 */
-  }
-  
-  .feelingItem.owned .feelingPrice {
-      display: none; /* 所有済みなら価格非表示 */
-  }
-  
-  /* ボタンとローダーのコンテナ */
-  .buttons {
-    /* ... existing styles ... */
-    position: relative; /* ローダーの位置基準 */
-    min-width: 120px; /* ボタンやローダーの最低幅 */
-    display: flex;
-    justify-content: flex-end; /* 右寄せ */
-  }
-  
-  .loader {
-    /* ... existing styles ... */
-    /* 位置調整は不要かも */
-  }
-  
-  .purchaseButton.purchasing {
-    /* ... existing styles ... */
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  .dataCollectorLink {
+      font-size: 0.9rem;
+     font-weight: 600;
+     color: var(--light-grey);
+      text-decoration: none;
+ padding: 0.4rem 1rem;
+      border-radius: 6px;
+     transition: color 0.2s ease, background-color 0.2s ease;
+      /* margin-left: auto; ロゴに auto をつけたので不要 */
+      margin-right: 1rem; /* ウォレット情報エリアとのスペース */
+      white-space: nowrap; /* 折り返し防止 */
+    }
+    
+    .dataCollectorLink:hover {
+      color: var(--white);
+     background-color: rgba(255, 255, 255, 0.1);
+    }

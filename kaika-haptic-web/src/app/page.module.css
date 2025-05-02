@@ -1,4 +1,8 @@
+/* ──────────────────────────────────────────────
+   File: src/app/page.module.css
+   ────────────────────────────────────────────── */
 
+/* ===== リセット & 変数 ===== */
 :global(html),
 :global(body){
   margin:0;
@@ -9,7 +13,6 @@
 }
 
 .main{
-  /* === raycast-style orange-black palette === */
   --primary-color:#ff6b00;
   --primary-dark:#cc5500;
   --primary-light:#ff8c33;
@@ -25,38 +28,34 @@
   --dot-color:rgba(255,255,255,0.05);
 
   position:relative;
-  min-height:100vh; display:flex; flex-direction:column;
-  background:var(--bg-color); color:var(--text-color);
-  overflow-x:hidden; font-family:'Inter','SF Pro Display','Roboto',sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:var(--bg-color);
+  color:var(--text-color);
+  overflow-x:hidden;
 }
 
-/* Raycast風の背景要素 */
+/* ===== 背景エフェクト ===== */
 .gradientBackground{
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  top:0; left:0;
+  width:100%; height:100%;
   z-index:0;
   pointer-events:none;
   background:radial-gradient(circle at 20% 50%, rgba(255,107,0,0.08) 0%, rgba(0,0,0,0) 70%);
 }
-
 .dotGrid{
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  inset:0;
   z-index:1;
   pointer-events:none;
-  background-image:
-    radial-gradient(var(--dot-color) 1px, transparent 1px);
+  background-image:radial-gradient(var(--dot-color) 1px, transparent 1px);
   background-size:20px 20px;
   opacity:0.5;
 }
 
-/* header */
+/* ===== Header ===== */
 .header{
   display:flex;
   justify-content:space-between;
@@ -69,7 +68,6 @@
   background:rgba(26,26,26,.85);
   border-bottom:1px solid var(--border-color);
 }
-.logo{font-weight:700;font-size:1.4rem;}
 .navLink{
   color:var(--text-secondary);
   text-decoration:none;
@@ -78,8 +76,54 @@
   transition:color .2s;
 }
 .navLink:hover{color:var(--primary-color);}
+.walletButton{
+  background:var(--primary-color);
+  color:#fff;
+  font-size:0.9rem;
+  padding:.6rem 1.2rem;
+  border-radius:8px;
+  border:none;
+  transition:all .2s ease;
+}
+.walletButton:hover{
+  background:var(--primary-light);
+  transform:translateY(-2px);
+  box-shadow:0 4px 10px -2px rgba(255,107,0,0.3);
+}
 
-/* buttons - Raycast風 */
+/* ===== Hero ===== */
+.hero{
+  min-height:90vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:6rem 2rem;
+  text-align:center;
+  position:relative;
+  z-index:5;
+}
+.catchphrase{
+  font-size:3.5rem;
+  font-weight:800;
+  margin:.5rem 0 1.5rem;
+  background:linear-gradient(135deg,var(--primary-color),var(--secondary-color) 60%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  letter-spacing:-0.02em;
+  line-height:1.2;
+}
+.description{
+  max-width:640px;
+  line-height:1.6;
+  color:var(--text-secondary);
+  font-size:1.1rem;
+  margin-bottom:2rem;
+}
+.heroCta{display:flex; gap:1rem; margin-top:1rem;}
+
+/* ===== Buttons ===== */
 .primaryButton{
   background:var(--primary-color);
   border:none;
@@ -110,64 +154,8 @@
   border-color:rgba(255,255,255,0.2);
 }
 
-.walletButton{
-  background:var(--primary-color);
-  color:#fff;
-  font-size:0.9rem;
-  padding:.6rem 1.2rem;
-  border-radius:8px;
-  border:none;
-  transition:all .2s ease;
-}
-.walletButton:hover{
-  background:var(--primary-light);
-  transform:translateY(-2px);
-  box-shadow:0 4px 10px -2px rgba(255,107,0,0.3);
-}
-
-/* hero - Raycast風 */
-.hero{
-  position:relative;
-  z-index:5;
-  min-height:90vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  padding:6rem 2rem;
-  text-align:center;
-}
-.catchphrase{
-  font-size:3.5rem;
-  font-weight:800;
-  margin:.5rem 0 1.5rem;
-  background:linear-gradient(135deg,var(--primary-color),var(--secondary-color) 60%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  letter-spacing:-0.02em;
-  line-height:1.2;
-}
-.description{
-  max-width:640px;
-  line-height:1.6;
-  color:var(--text-secondary);
-  font-size:1.1rem;
-  margin-bottom:2rem;
-}
-.heroCta{
-  display:flex;
-  gap:1rem;
-  margin-top:1rem;
-}
-
-/* features - Raycast風 */
-.featuresSection{
-  position:relative;
-  z-index:5;
-  padding:6rem 2rem;
-  background:rgba(255,255,255,.01);
-}
+/* ===== About ===== */
+.aboutSection{position:relative;z-index:5;padding:6rem 2rem;background:rgba(255,255,255,.01);}
 .sectionTitle{
   font-size:2.2rem;
   font-weight:700;
@@ -175,90 +163,50 @@
   margin-bottom:3rem;
   letter-spacing:-0.01em;
 }
-.featuresGrid{
+.aboutGrid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:1.5rem;
 }
-.featureCard{
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.06);
+.aboutCard{
+  background:var(--card-bg);
+  border:1px solid var(--border-color);
   border-radius:12px;
   padding:1.8rem;
   text-align:left;
   transition:all .3s ease;
 }
-.featureCard:hover{
+.aboutCard:hover{
   transform:translateY(-6px);
   background:rgba(255,255,255,0.04);
   border-color:rgba(255,255,255,0.1);
   box-shadow:0 12px 24px -6px rgba(0,0,0,0.3);
 }
-.featureCard h3{
-  font-size:1.2rem;
-  font-weight:600;
-  margin:0.8rem 0;
-}
-.featureCard p{
-  color:var(--text-secondary);
-  line-height:1.6;
-}
 .featureIcon{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:40px;
-  height:40px;
+  display:flex; align-items:center; justify-content:center;
+  width:40px; height:40px;
   border-radius:8px;
   background:rgba(255,107,0,0.1);
   font-size:1.5rem;
   margin-bottom:1rem;
 }
+.aboutCard h3{font-size:1.2rem;font-weight:600;margin:.8rem 0;}
+.aboutCard p{color:var(--text-secondary);line-height:1.6;}
 
-/* device - Raycast風 */
-.deviceSection{
-  position:relative;
-  z-index:5;
-  display:flex;
-  flex-wrap:wrap;
-  gap:4rem;
-  padding:8rem 2rem;
-}
-.deviceContent{
-  flex:1;
-  min-width:300px;
-}
-.deviceFeatures{
-  margin:2rem 0;
-  padding:0;
-  list-style:none;
-}
-.deviceFeature{
-  display:flex;
-  align-items:center;
-  gap:1rem;
-  margin-bottom:1.6rem;
-  color:var(--text-secondary);
-}
+/* ===== Device ===== */
+.deviceSection{position:relative;z-index:5;display:flex;flex-wrap:wrap;gap:4rem;padding:8rem 2rem;}
+.deviceWrap{max-width:1200px;margin:0 auto;}  /* 中央寄せ */
+.deviceContent{flex:1;min-width:300px;}
+.deviceFeatures{margin:2rem 0;padding:0;list-style:none;}
+.deviceFeature{display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem;color:var(--text-secondary);}
 .featureNumber{
-  width:36px;
-  height:36px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:8px;
-  background:rgba(255,107,0,.1);
-  color:var(--primary-color);
-  font-weight:600;
-  font-size:0.9rem;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;background:rgba(255,107,0,.1);
+  color:var(--primary-color);font-weight:600;font-size:.9rem;
 }
 .purchaseButton{
   background:var(--primary-color);
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:1rem 2.5rem;
-  font-weight:600;
+  color:#fff;border:none;border-radius:8px;padding:1rem 2.5rem;font-weight:600;
   transition:all .2s ease;
 }
 .purchaseButton:hover{
@@ -266,75 +214,50 @@
   background:var(--primary-light);
   box-shadow:0 8px 16px -4px rgba(255,107,0,0.3);
 }
-
-.deviceVisual{
-  flex:1;
-  min-width:300px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.deviceImage{
-  border-radius:12px;
-  box-shadow:0 20px 40px rgba(0,0,0,.5);
-}
-
-/* CTA - Raycast風 */
-.launchSection{
-  position:relative;
-  z-index:5;
-  text-align:center;
-  padding:8rem 2rem;
-  background:rgba(255,255,255,.01);
-  border-top:1px solid var(--border-color);
-}
-.launchTitle{
-  font-size:2.2rem;
-  font-weight:700;
-  margin-bottom:2rem;
-  letter-spacing:-0.01em;
-}
-.launchButton{
-  background:var(--primary-color);
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:1.1rem 2.8rem;
-  font-size:1.1rem;
-  font-weight:600;
-  transition:all .3s ease;
-  position:relative;
-  overflow:hidden;
-}
-.launchButton:hover{
-  transform:translateY(-2px);
-  background:var(--primary-light);
-  box-shadow:0 12px 24px -6px rgba(255,107,0,0.3);
-}
-.launchButton::before{
-  content:'';
-  position:absolute;
-  top:0;
-  left:-100%;
-  width:100%;
-  height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
-  transition:left .5s ease;
-}
-.launchButton:hover::before{
-  left:100%;
-}
-
-/* ===== About (旧 features) ===== */
-.aboutSection{position:relative;z-index:5;padding:6rem 2rem;background:rgba(255,255,255,.01);}
-.aboutGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;}
-.aboutCard{/* 旧 .featureCard と同一 */}
+.deviceVisual{flex:1;min-width:300px;display:flex;justify-content:center;align-items:center;}
+.deviceImage{border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.5);}
 
 /* ===== Team ===== */
 .teamSection{position:relative;z-index:5;text-align:center;padding:6rem 2rem;}
-.teamGrid{display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;}
-.memberCard{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:2rem 1.5rem;width:220px;display:flex;flex-direction:column;align-items:center;transition:.3s;}
+.teamIntro{max-width:640px;margin:0 auto 3rem;color:var(--text-secondary);}
+.teamGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:2rem;
+  max-width:900px;
+  margin:0 auto;
+}
+.memberCard{
+  width:100%;height:280px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:2rem 1.5rem;
+  text-align:center;transition:.3s;
+}
 .memberCard:hover{transform:translateY(-6px);background:rgba(255,255,255,.04);}
-.memberAvatar{width:88px;height:88px;border-radius:50%;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,.4);margin-bottom:1rem;}
-.memberName{font-weight:600;font-size:1.05rem;margin-bottom:.2rem;}
-.memberRole{color:var(--text-secondary);font-size:.9rem;}
+.memberAvatar{
+  width:88px;height:88px;border-radius:50%;object-fit:cover;
+  background:url('/no_avatar.png') center/cover no-repeat;
+  box-shadow:0 4px 12px rgba(0,0,0,.4);margin-bottom:1rem;
+}
+.memberName{font-weight:600;font-size:1.05rem;}
+.memberRole{font-size:.85rem;line-height:1.35;color:var(--text-secondary);}
+
+/* ===== CTA ===== */
+.launchSection{
+  position:relative;z-index:5;text-align:center;padding:8rem 2rem;
+  background:rgba(255,255,255,.01);border-top:1px solid var(--border-color);
+}
+.launchTitle{font-size:2.2rem;font-weight:700;margin-bottom:2rem;letter-spacing:-0.01em;}
+.launchButton{
+  background:var(--primary-color);color:#fff;border:none;border-radius:8px;
+  padding:1.1rem 2.8rem;font-size:1.1rem;font-weight:600;transition:all .3s ease;position:relative;overflow:hidden;
+}
+.launchButton:hover{
+  transform:translateY(-2px);background:var(--primary-light);
+  box-shadow:0 12px 24px -6px rgba(255,107,0,0.3);
+}
+.launchButton::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+  transition:left .5s ease;
+}
+.launchButton:hover::before{left:100%;}

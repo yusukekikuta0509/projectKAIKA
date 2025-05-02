@@ -1,88 +1,418 @@
 /* src/app/app/datacollector/datacollector.module.css */
-/* 基本レイアウトは haptic.module.css と共通部分が多い */
-/* .main, .header, .logo, .nav, .navLink, .walletInfo, .walletAddress, .kaikaBalance, .walletButton, */
-/* .gradientBackground, .dotGrid, .contentWrapper, .section は流用または微調整 */
-@import url('../haptic/haptic.module.css');/* hapticのスタイルを一部インポート */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* データ収集セクション特有のスタイル */
-.collectionSection {
-  text-align: center;
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #0a0a0a;
+  color: #f5f5f5;
+  font-family: 'Inter', sans-serif;
 }
 
-.statusIndicator {
-  margin-bottom: 1.5rem;
-  font-size: 1.1rem;
-  padding: 1rem;
-  border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.2);
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 107, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.statusIndicator.idle {
-  color: #aaa;
-}
-.statusIndicator.collecting {
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #ff6b00;
-  font-weight: bold;
-  animation: pulse 1.5s infinite ease-in-out; /* 点滅アニメーション */
+  text-decoration: none;
+  letter-spacing: 1px;
 }
-.statusIndicator.collected {
-    color: #28a745; /* 緑色 */
+
+.nav {
+  display: flex;
+  gap: 1.5rem;
 }
-.statusIndicator.submitting {
-    color: #007bff; /* 青色 */
+
+.navLink {
+  color: #e0e0e0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+.navLink:hover {
+  color: #ff6b00;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #ff6b00;
+  transition: width 0.3s ease;
+}
+
+.navLink:hover::after {
+  width: 100%;
+}
+
+.walletInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.walletAddress {
+  background-color: rgba(255, 107, 0, 0.1);
+  color: #ff6b00;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 107, 0, 0.3);
+}
+
+.kaikaBalance {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ff6b00;
+}
+
+.walletButton {
+  background-color: #ff6b00 !important;
+  color: #0a0a0a !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.walletButton:hover {
+  background-color: #ff8c3f !important;
+}
+
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  padding: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Map & Data Collection Container */
+.dashboardContainer {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Map Container */
+.mapContainer {
+  height: calc(100vh - 180px);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background-color: #111111;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 107, 0, 0.2);
+}
+
+.mapOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 40%, rgba(10, 10, 10, 0.5) 100%);
+  z-index: 10;
+}
+
+.userLocation {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background-color: #ff6b00;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.3);
+  animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.6; }
-  100% { opacity: 1; }
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 107, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 0, 0);
+  }
+}
+
+.pathTrail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.mapControls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mapButton {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #0a0a0a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
+  border: none;
+  font-size: 1.2rem;
+}
+
+.mapButton:hover {
+  background-color: #ff6b00;
+  color: white;
+}
+
+/* Data Collection Panel */
+.controlPanel {
+  padding: 1.5rem;
+  background-color: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  height: fit-content;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 107, 0, 0.2);
+}
+
+.panelTitle {
+  margin: 0 0 1rem 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ff6b00;
+}
+
+.panelIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.statusCard {
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid #666;
+}
+
+.statusCard.idle {
+  border-left-color: #666;
+}
+
+.statusCard.collecting {
+  border-left-color: #ff6b00;
+  background: rgba(255, 107, 0, 0.1);
+  animation: pulse-background 2s infinite;
+}
+
+.statusCard.collected {
+  border-left-color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.statusCard.submitting {
+  border-left-color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
+}
+
+@keyframes pulse-background {
+  0% {
+    background: rgba(255, 107, 0, 0.05);
+  }
+  50% {
+    background: rgba(255, 107, 0, 0.2);
+  }
+  100% {
+    background: rgba(255, 107, 0, 0.05);
+  }
+}
+
+.statusLabel {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 0.3rem;
+}
+
+.statusValue {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #eee;
+}
+
+.collectionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.infoLabel {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.infoValue {
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.infoValue.highlight {
+  color: #ff6b00;
+  font-weight: 600;
 }
 
 .actionButton {
-  padding: 0.8rem 2rem;
-  font-size: 1.1rem;
-  font-weight: bold;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  min-width: 200px;
-  margin-top: 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
+
 .actionButton.start {
-  background-color: #28a745; /* 緑 */
+  background-color: #28a745;
   color: white;
 }
+
 .actionButton.stop {
-  background-color: #dc3545; /* 赤 */
+  background-color: #dc3545;
   color: white;
 }
+
 .actionButton.submit {
-  background-color: #007bff; /* 青 */
+  background-color: #ff6b00;
   color: white;
 }
+
 .actionButton:disabled {
-  background-color: #6c757d;
+  background-color: #333;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.collectedDataInfo {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  color: #ccc;
+.actionButton.start:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.actionButton.stop:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.actionButton.submit:hover:not(:disabled) {
+  background-color: #e25c00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .submissionStatus {
-  margin-top: 1.5rem;
-  font-weight: 500;
-  color: #eee;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  text-align: center;
 }
+
 .submissionStatus.success {
-    color: #28a745;
+  color: #28a745;
+  background-color: rgba(40, 167, 69, 0.1);
 }
+
 .submissionStatus.error {
-    color: #dc3545;
+  color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.statsContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.statCard {
+  padding: 0.8rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ff6b00;
+  margin-bottom: 0.2rem;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: #aaa;
 }
