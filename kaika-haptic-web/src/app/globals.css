@@ -1,5 +1,71 @@
-/* app/globals.css – only a reset & scroll-bar tweak */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;scroll-behavior:smooth}
-::-webkit-scrollbar{width:8px}
-::-webkit-scrollbar-thumb{background:#444;border-radius:4px}
+html,
+body{
+  margin:0;
+  padding:0;
+  background:#1a1a1a;
+  color:#f1f1f1;
+  font-family:'Inter','SF Pro Display','Roboto',sans-serif;
+}
+
+/* ─── カラーパレットと基本変数 ─── */
+:root {
+  --kaika-orange: #ff6b00;
+  --kaika-orange-dark: #e65c00;
+  --kaika-orange-glow: rgba(255, 107, 0, 0.6);
+  --kaika-orange-light-glow: rgba(255, 107, 0, 0.3);
+  --kaika-black: #0A0A0A;
+  --kaika-near-black: #111111;
+  --kaika-dark-grey: #1a1a1a; /* パネル背景など */
+  --kaika-mid-grey: #2a2a2a; /* ボーダーや区切り線 */
+  --kaika-light-grey: #aeaeae; /* 通常テキスト */
+  --kaika-white: #f0f0f0; /* 明るいテキスト、ハイライト */
+  --kaika-accent-cyan: #00ffff; /* ネオンアクセント */
+  --kaika-accent-cyan-glow: rgba(0, 255, 255, 0.7);
+  --kaika-mint-green: #00ffa3;
+  --kaika-usdc-blue: #2775CA; /* USDCカラー */
+  --kaika-usdc-blue-light: #5fa9f8;
+  --kaika-font-sans: 'Inter', sans-serif;
+  --kaika-font-mono: 'Roboto Mono', monospace;
+  --header-height: 70px; /* ヘッダー高さ */
+}
+
+:root {
+  --kaika-black: #0A0A0A;
+  --kaika-near-black: #111111;
+  --kaika-mid-grey: #2a2a2a;
+}
+
+.ReactModal__Overlay {
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+  background-color: rgba(0, 0, 0, 0.75);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000; /* Ensure it's on top */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ReactModal__Overlay--after-open {
+  opacity: 1;
+}
+
+.ReactModal__Overlay--before-close {
+  opacity: 0;
+}
+
+.ReactModal__Content {
+  /* Modal自体のスタイルをここに記述 */
+  background: #fff; /* 例 */
+  padding: 20px;   /* 例 */
+  border-radius: 8px; /* 例 */
+  position: relative; /* 相対位置 */
+  inset: auto; /* 初期化 */
+  border: none; /* 初期化 */
+  overflow: auto; /* 内容が多い場合にスクロール */
+  outline: none; /* フォーカスアウトラインを消す */
+}

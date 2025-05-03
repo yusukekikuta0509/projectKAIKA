@@ -2,7 +2,8 @@
 'use client';
 import React from 'react';
 import Modal from 'react-modal';
-import Image from 'next/image'; // Next.js の Image コンポーネントを使用
+// import Image from 'next/image'; // Imageコンポーネントは不要に
+import DeviceModel from './DeviceModel'; // ★★★ 3Dモデルコンポーネントをインポート ★★★
 import styles from './deviceconnectmodal.module.css'; // モーダル用CSS
 
 // 型定義
@@ -16,13 +17,11 @@ interface Props {
 }
 
 // アプリケーションのルート要素を指定 (Next.jsの場合)
-// クライアントサイドでのみ実行
 if (typeof window !== 'undefined') {
     const appElement = document.getElementById('__next');
     if (appElement) {
         Modal.setAppElement(appElement);
     } else {
-        // Next.js 13 App Routerなど、#_nextがない場合のフォールバック
         Modal.setAppElement(document.body);
         console.warn("Modal.setAppElement: Could not find #__next, using document.body as fallback. Ensure your root layout has an identifiable element if needed.");
     }
@@ -31,34 +30,20 @@ if (typeof window !== 'undefined') {
 
 export default function DeviceConnectModal({ isOpen, onRequestClose, onConnect, connectionStatus }: Props) {
 
-  // 接続ボタンクリック時の処理
   const handleConnectClick = async () => {
     // 接続中や接続済みは何もしない
     if (connectionStatus === 'connecting' || connectionStatus === 'connected') return;
     await onConnect(); // 親コンポーネントの接続処理を呼び出す
   };
 
-  // モーダル内のコンテンツを接続状態に応じてレンダリング
   const renderContent = () => {
-    const showImage = connectionStatus !== 'failed'; // 失敗時以外は画像表示
+    // 失敗時以外は3Dモデルを表示
+    const showModel = connectionStatus !== 'failed';
 
     return (
       <>
-        {/* デバイス画像 (失敗時以外) */}
-        {showImage && (
-          <div className={styles.deviceImageContainer}>
-            <Image
-              // ★★★ publicディレクトリ内の画像パスを確認・修正してください ★★★
-              // 例: /public/kaika.jpeg の場合 src="/kaika.jpeg"
-              src="/kaika_device.png" // 提供されたファイル名に合わせる
-              alt="KAIKA Device"
-              width={150} // 画像の表示サイズ (必要に応じて調整)
-              height={150} // 画像の表示サイズ (必要に応じて調整)
-              className={styles.deviceImage}
-              priority // LCP要素になる可能性があれば優先ロード
-            />
-          </div>
-        )}
+        {/* ★★★ 3Dモデル表示に置き換え ★★★ */}
+        {showModel && <DeviceModel />}
 
         {/* ステータスに応じたメッセージとボタン */}
         {connectionStatus === 'connecting' && (
@@ -79,6 +64,8 @@ export default function DeviceConnectModal({ isOpen, onRequestClose, onConnect, 
           <>
             <div className={styles.errorIcon}>✕</div>
             <p>Connection failed. Please ensure your device is on and nearby, then try again.</p>
+            {/* 失敗時もモデル表示する場合 */}
+            {/* <DeviceModel /> */}
             <button className={styles.connectButton} onClick={handleConnectClick}>Retry</button>
           </>
         )}

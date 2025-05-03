@@ -2,7 +2,7 @@
 'use client';
 import React, { useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Plane, Box, Sphere, Capsule, Stars, Grid, Edges } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Stars} from '@react-three/drei';
 import * as THREE from 'three';
 
 /* ── 定数 ── */
@@ -69,8 +69,7 @@ function Avatar({ pos, collecting, direction }: { pos: [number, number, number],
   const lightRef = useRef<THREE.PointLight>(null!);
   const intensityFactor = collecting ? 1.6 : 1.0;
 
-  // Target direction for lookAt
-  const lookTarget = useMemo(() => new THREE.Vector3(), []);
+
   // Current rotation for smooth turning
   const currentRotationY = useRef(0);
 
@@ -143,7 +142,7 @@ function GridFloor() {
 /* ── Main 3D Map Viewer Component ── */
 // userDirection prop を追加
 export default function MapViewer3D({ userPosition, collectionState, userDirection }: MapViewer3DProps & { userDirection: {x: number, z: number}}) {
-  const scale = (BLOCK + ROAD);
+
   const worldOriginOffset = HALF;
   const wx = (userPosition.x / 100 * (HALF*2)) - worldOriginOffset;
   const wz = (userPosition.y / 100 * (HALF*2)) - worldOriginOffset;

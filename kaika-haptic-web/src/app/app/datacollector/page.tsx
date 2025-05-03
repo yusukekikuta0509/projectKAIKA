@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
 // --- Import Icons ---
 import { FaMountain, FaTree, FaUmbrellaBeach, FaWater, FaQuestion } from 'react-icons/fa';
-import { FiPlay, FiSquare, FiUploadCloud, FiCheckCircle, FiAlertCircle, FiLoader, FiMapPin, FiDatabase, FiClock, FiTrendingUp, FiCompass, FiRepeat, FiMaximize } from 'react-icons/fi';
-import { SiSolana } from 'react-icons/si';
+import { FiPlay, FiSquare, FiUploadCloud, FiCheckCircle, FiAlertCircle, FiLoader, FiMapPin, FiDatabase, FiClock, FiTrendingUp, FiCompass } from 'react-icons/fi';
+
 
 // --- Import CSS ---
 import styles from './datacollector.module.css';
@@ -48,7 +49,7 @@ const KAIKA_REWARD_PER_SECOND = 0.3;
 const KAIKA_REWARD_PER_DISTANCE = 0.5;
 const MIN_KAIKA_REWARD = 5;
 const CURRENT_LOCATION = "Shibuya Crossing";
-const NETWORK_NAME = "Devnet";
+
 
 // Tokyo landmark data - findNearestLandmarkで使用
 const TOKYO_LANDMARKS = [
@@ -93,12 +94,12 @@ export default function DataCollectorPage() {
   const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
   const [earnedKaika, setEarnedKaika] = useState<number | null>(null);
   const [mockKaikaBalance, setMockKaikaBalance] = useState(125);
-  const [dataTransferAnimation, setDataTransferAnimation] = useState(false);
   const [userLogicPosition, setUserLogicPosition] = useState<Position>({ x: 50, y: 50 });
   const [currentLocationName, setCurrentLocationName] = useState<string>(CURRENT_LOCATION);
   const [dataCollected, setDataCollected] = useState<number>(0);
   const [totalDistance, setTotalDistance] = useState<number>(0);
   const [simulatedDataType, setSimulatedDataType] = useState<string | null>(null);
+  
 
   // --- Refs ---
   const movementTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -106,10 +107,7 @@ export default function DataCollectorPage() {
   // ★★★ currentDirectionRef の定義を追加 ★★★
   const currentDirectionRef = useRef({ x: 0, y: 1 }); // 初期方向 (例: Y軸プラス方向、つまり3D空間のZ軸プラス方向)
 
-   // --- Memoized Values ---
-   const selectedTerrainLabel = useMemo(() => {
-       return terrains.find(t => t.id === selectedTerrain)?.label ?? 'Environment';
-   }, [selectedTerrain]);
+
 
 
    // --- Helper: Find nearest landmark ---
@@ -218,7 +216,7 @@ export default function DataCollectorPage() {
     if (collectionState !== 'collected' || !connected || earnedKaika === null) return;
     setCollectionState('submitting');
     setSubmissionStatus("Packaging data...");
-    setDataTransferAnimation(true); console.log("Submitting data...");
+    
     setTimeout(() => {
       setSubmissionStatus("Uploading securely...");
       setTimeout(() => {
@@ -226,7 +224,7 @@ export default function DataCollectorPage() {
         setTimeout(() => {
           setMockKaikaBalance(prev => prev + earnedKaika);
           setSubmissionStatus(`Success! +${earnedKaika} KAIKA`);
-          setCollectionState('idle'); setDataTransferAnimation(false);
+          setCollectionState('idle'); 
           setTimeout(() => { // Clear stats after showing success
             setSelectedTerrain(null); setSimulatedDataType(null); setEarnedKaika(null);
             setSubmissionStatus(null); setDataCollected(0); setTotalDistance(0);
@@ -235,7 +233,7 @@ export default function DataCollectorPage() {
         }, 2000 + Math.random() * 1000);
       }, 1500);
     }, 1000);
-    setTimeout(() => setDataTransferAnimation(false), 5000); // Animation fallback stop
+    setTimeout(() =>  5000); // Animation fallback stop
   };
 
 
@@ -270,12 +268,23 @@ export default function DataCollectorPage() {
 
   // --- Calculate User Direction for Avatar ---
   const userDirection = useMemo(() => {
-      const dx = userLogicPosition.x - previousPositionRef.current.x;
-      const dz = userLogicPosition.y - previousPositionRef.current.y; // Logic Y -> World Z
-      const length = Math.sqrt(dx * dx + dz * dz);
-      // Return normalized direction or (0,0) if no movement
-      return length > 0.01 ? { x: dx / length, z: dz / length } : { x: 0, z: 0 };
-  }, [userLogicPosition]); // Depends only on userLogicPosition
+    const dx = userLogicPosition.x - previousPositionRef.current.x;
+    const dz = userLogicPosition.y - previousPositionRef.current.y; // Logic Y -> World Z
+    const length = Math.sqrt(dx * dx + dz * dz);
+
+    if (length > 0.01) {
+        // Normalize horizontal direction
+        const normX = dx / length;
+        const normZ = dz / length;
+        // Return a 3D vector with y=0 (assuming horizontal movement)
+        // ↓↓↓ y: 0 を追加 ↓↓↓
+        return { x: normX, y: 0, z: normZ };
+    } else {
+        // Return zero vector if no movement
+        // ↓↓↓ y: 0 を追加 ↓↓↓
+        return { x: 0, y: 0, z: 0 };
+    }
+}, [userLogicPosition]); // Depends only on userLogicPosition
 
 
   // --- Component Render ---
@@ -283,7 +292,9 @@ export default function DataCollectorPage() {
     <div className={styles.main}>
       {/* Header */}
       <header className={styles.header}>
-        <Link href="/" className={styles.logo}> <span className={styles.logoIcon}>◈</span> <span className={styles.logoText}>KAIKA</span> </Link>
+      <Link href="/" >
+           <Image src="/kaika_logo.png" alt="KAIKA" width={80} height={80} priority />
+        </Link>
         <nav className={styles.nav}> <Link href="/app/haptic" className={styles.navLink}>Haptic Select</Link> </nav>
         <div className={styles.walletInfo}>
           {connected && publicKey && ( <span className={styles.walletAddress} title={publicKey.toBase58()}> {truncateAddress(publicKey.toBase58())} </span> )}
@@ -429,3 +440,5 @@ export default function DataCollectorPage() {
       </div> 
   ); // End of component return
 } // End of component function
+
+

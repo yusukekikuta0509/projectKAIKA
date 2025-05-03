@@ -3,14 +3,7 @@
    ────────────────────────────────────────────── */
 
 /* ===== リセット & 変数 ===== */
-:global(html),
-:global(body){
-  margin:0;
-  padding:0;
-  background:#1a1a1a;
-  color:#f1f1f1;
-  font-family:'Inter','SF Pro Display','Roboto',sans-serif;
-}
+
 
 .main{
   --primary-color:#ff6b00;
@@ -261,3 +254,218 @@
   transition:left .5s ease;
 }
 .launchButton:hover::before{left:100%;}
+
+/* src/app/page.module.css */
+
+/* ... (他のスタイルは基本的に変更なし) ... */
+
+/* About Section */
+.aboutSection {
+  padding: 6rem 2rem; /* Adjust padding */
+  background-color: rgba(16, 16, 16, 0.5); /* Slightly darker background */
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 2.5rem; /* Adjust size */
+  font-weight: 700;
+  margin-bottom: 3rem; /* Increase space below title */
+  color: var(--kaika-white); /* Brighter title */
+}
+
+.aboutGrid {
+  display: grid;
+  /* Default: 1 column on small screens */
+  grid-template-columns: 1fr;
+  gap: 2rem; /* Adjust gap */
+  max-width: 1100px; /* Limit max width */
+  margin: 0 auto;
+}
+
+/* Grid layout for medium screens and up (3 columns) */
+@media (min-width: 768px) {
+  .aboutGrid {
+    /* 3つのカードを表示するように変更 */
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Removed .threeCards class as the grid adjusts */
+
+.aboutCard {
+  background: rgba(30, 30, 30, 0.7); /* Darker card background */
+  backdrop-filter: blur(10px);
+  padding: 2rem 1.5rem; /* Adjust padding */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 107, 0, 0.15); /* Subtle orange border */
+  text-align: left; /* Align text left */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.aboutCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(255, 107, 0, 0.1); /* Orange glow on hover */
+}
+
+.featureIcon {
+  display: inline-block;
+  font-size: 2rem; /* Icon size */
+  margin-bottom: 1rem;
+  color: var(--kaika-orange); /* Orange icon color */
+  /* If using react-icons, direct styling might be needed */
+}
+.aboutCard svg { /* Style react-icons specifically */
+    color: var(--kaika-orange);
+    width: 32px; /* Set fixed size */
+    height: 32px;
+}
+
+
+.aboutCard h3 {
+  font-size: 1.15rem; /* Adjust title size */
+  font-weight: 600;
+  margin-bottom: 0.8rem; /* Adjust space */
+  color: var(--kaika-white);
+}
+
+.aboutCard p {
+  font-size: 0.9rem; /* Adjust text size */
+  line-height: 1.6;
+  color: var(--kaika-light-grey);
+}
+
+
+/* ... (Teamセクション、Deviceセクションなどのスタイルは変更なし、または微調整) ... */
+
+/* Example: Team Grid - ensure it looks good */
+.teamGrid {
+  display: grid;
+  /* Adjust columns based on number of members */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  max-width: 800px; /* Adjust max width if needed */
+  margin: 3rem auto 0 auto; /* Adjust margin */
+}
+
+.memberCard {
+  text-align: center;
+  /* Add subtle background/border if desired */
+  /* background: rgba(255, 255, 255, 0.03); */
+  /* padding: 1rem; */
+  /* border-radius: 8px; */
+}
+
+.avatarWrapper {
+    margin-bottom: 1rem;
+    width: 88px; /* Match image size */
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+    border: 2px solid rgba(255, 107, 0, 0.3); /* Orange border */
+    box-shadow: 0 0 10px rgba(255, 107, 0, 0.1);
+}
+
+.memberAvatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.memberName {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--kaika-white);
+}
+
+.memberRole {
+  font-size: 0.85rem;
+  color: var(--kaika-light-grey);
+  line-height: 1.4;
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2.5rem;
+  max-width: 900px;
+  margin: 4rem auto 0 auto;
+}
+
+.memberCard {
+  text-align: center;
+  background: rgba(35, 35, 35, 0.5);
+  padding: 1.8rem 1rem 1.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 107, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.memberCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* アバター画像を囲むラッパーに relative を設定 */
+.avatarWrapper {
+    position: relative; /* バッジの位置基準 */
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    overflow: visible; /* バッジがはみ出ても表示されるように (必要なら) */
+    margin: 0 auto 1.2rem auto;
+    border: 3px solid var(--kaika-orange);
+    box-shadow: 0 0 15px var(--kaika-orange-light-glow);
+    display: inline-block; /* 中央揃えのため */
+}
+
+.memberAvatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%; /* Ensure image is circular */
+}
+
+/* Superteam Japan Badge Style (New) */
+.superteamBadge {
+    position: absolute;
+    bottom: -25px; /* 位置調整 */
+    right: -25px;  /* 位置調整 */
+    width: 50px; /* バッジサイズ */
+    height: 50px;
+    border-radius: 50%; /* 丸形 */
+    background-color: var(--kaika-dark-grey); /* 背景色で見やすく */
+    padding: 2px; /* 内側の余白 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4); /* 影 */
+    
+    z-index: 2; /* アバター画像より手前 */
+}
+/* Ensure the badge image itself is also rounded if needed */
+.superteamBadge img {
+    border-radius: 50%;
+    display: block;
+}
+
+
+.memberName {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem; /* 下マージン調整 */
+  color: var(--kaika-white);
+}
+
+.memberRole {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--kaika-light-grey);
+  line-height: 1.5;
+  margin-bottom: 0.8rem; /* タグとのスペース */
+}
+
+/* Tag Styles */
+

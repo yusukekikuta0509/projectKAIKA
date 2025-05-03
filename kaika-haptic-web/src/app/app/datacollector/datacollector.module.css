@@ -1,27 +1,6 @@
 /* src/app/app/datacollector/datacollector.module.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap');
 
-/* ─── カラーパレットと基本変数 ─── */
-:root {
-  --kaika-orange: #ff6b00;
-  --kaika-orange-dark: #e65c00;
-  --kaika-orange-glow: rgba(255, 107, 0, 0.7); /* Brighter glow */
-  --kaika-orange-light-glow: rgba(255, 107, 0, 0.4);
-  --kaika-black: #0A0A0A;
-  --kaika-near-black: #111111;
-  --kaika-dark-grey: #1a1a1a;
-  --kaika-mid-grey: #2a2a2a;
-  --kaika-light-grey: #aeaeae;
-  --kaika-white: #f0f0f0;
-  --kaika-accent-cyan: #00ffff;
-  --kaika-accent-cyan-glow: rgba(0, 255, 255, 0.7);
-  --kaika-font-sans: 'Inter', sans-serif;
-  --kaika-font-mono: 'Roboto Mono', monospace;
-  --header-height: 65px;
-}
-
-/* ─── グローバルスタイルリセット ─── */
-:global(*) { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ─── Main Layout ─── */
 .main {

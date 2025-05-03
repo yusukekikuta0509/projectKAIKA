@@ -1,72 +1,58 @@
 // src/components/DeviceModel.tsx
 'use client';
-// useEffect を react からインポート
-import React, { Suspense, useRef, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Stage, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei';
+import React, { JSX, Suspense, useRef } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, useGLTF, AdaptiveDpr, AdaptiveEvents, Preload } from '@react-three/drei';
+import * as THREE from 'three';
 
 // GLTFモデルをロードして表示するコンポーネント
 function Model({ url, ...props }: { url: string } & JSX.IntrinsicElements['group']) {
   const { scene } = useGLTF(url);
-  const modelRef = useRef<THREE.Group>(null);
-  useFrame((state, delta) => {
-    if (modelRef.current) {
-      modelRef.current.rotation.y += delta * 0.3;
-    }
-  });
-  return <primitive object={scene} ref={modelRef} scale={1.5} position={[0, -0.5, 0]} {...props} />;
+  const modelRef = useRef<THREE.Group>(null!);
+
+  // useFrameによる自動回転はOrbitControlsと干渉するため削除（ユーザー操作に任せる）
+  // useFrame((state, delta) => {
+  //   if (modelRef.current) {
+  //     modelRef.current.rotation.y += delta * 0.3;
+  //   }
+  // });
+
+  // モデルの初期位置やスケールを調整
+  return <primitive object={scene} ref={modelRef} scale={3.0} position={[0, -0.2, 0]} {...props} />;
 }
 
 // Canvasセットアップとモデル表示
 export default function DeviceModel() {
-  // モデルURLをコンポーネント内で定義
-  const modelUrl = '/models/kaika_device.glb'; // ★★★ パスを確認してください ★★★
-
-  // useEffect を使ってコンポーネントマウント時に preload を試みる
-  useEffect(() => {
-    // modelUrl が有効な場合にのみ preload を試行
-    if (modelUrl) {
-        try {
-          useGLTF.preload(modelUrl);
-          console.log("Preloading model:", modelUrl); // 成功ログ（デバッグ用）
-        } catch (error) {
-          // エラー発生時、modelUrl はこのスコープで利用可能
-          console.error("Failed to preload model:", modelUrl, error);
-          // ここでユーザーへのエラー通知など、適切なエラーハンドリングを行うことができます
-        }
-    }
-  }, [modelUrl]); // modelUrl が変更された場合に再実行（通常は固定URLなので初回のみ）
+  // ★★★ ここに用意したGLBファイルのパスを指定 (publicディレクトリからの相対パス) ★★★
+  const modelUrl = '/deviceModel.glb'; // 例: public/models/kaika_device.glb
 
   return (
-    <div style={{ height: '200px', width: '100%', cursor: 'grab', touchAction: 'none' }}>
-      <Canvas shadows camera={{ position: [0, 0.5, 4], fov: 45 }}>
-        <ambientLight intensity={Math.PI / 1.5} />
-        <spotLight
-          position={[5, 5, 5]}
-          angle={0.3}
-          penumbra={1}
-          decay={0}
-          intensity={Math.PI}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI / 2} />
+    // スタイルでコンテナのサイズと操作感を設定
+    <div style={{ height: '500px', width: '100%', cursor: 'grab', touchAction: 'none', marginBottom: '0.5rem' }}>
+      <Canvas shadows camera={{ position: [0, 0.5, 5], fov: 45 }}> {/* カメラ位置調整 */}
+        {/* ライティング調整 */}
+        <ambientLight intensity={Math.PI * 0.6} />
+        <spotLight position={[10, 10, 10]} angle={0.2} penumbra={0.8} intensity={Math.PI * 1.5} castShadow shadow-mapSize={1024} />
+        <pointLight position={[-10, -5, -10]} intensity={Math.PI * 0.8} color="#ffae5c" /> {/* オレンジ系の補助光 */}
+
         <Suspense fallback={null}> {/* モデルロード中のフォールバック */}
-           {/* モデルURLが有効な場合のみ Stage と Model をレンダリング */}
-           {modelUrl && (
-                <Stage environment="city" intensity={0.5}>
-                    <Model url={modelUrl} />
-                </Stage>
-           )}
+           {/* Stageはシンプルなシーンでは不要な場合も。直接モデルを配置 */}
+           {/* <Stage environment="city" intensity={0.6}> */}
+                <Model url={modelUrl} />
+           {/* </Stage> */}
+           <Preload all /> {/* モデルを事前にロード */}
         </Suspense>
+
+        {/* OrbitControlsで360度回転可能に */}
         <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          autoRotate
-          autoRotateSpeed={0.6}
-          minPolarAngle={Math.PI / 2.5}
-          maxPolarAngle={Math.PI / 2.5}
+          enableZoom={false} // ズームは無効化 (任意)
+          enablePan={false} // パンも無効化 (任意)
+          enableRotate={true} // 回転は有効化
+          autoRotate={true} // ★ 自動回転を有効化 ★
+          autoRotateSpeed={1.0} // 自動回転の速度
+          minPolarAngle={Math.PI / 2.5} // 縦回転の制限 (下から見上げすぎない)
+          maxPolarAngle={Math.PI / 2.5} // 縦回転の制限 (上から見下ろしすぎない)
+          target={[0, 0, 0]} // 回転の中心
         />
         <AdaptiveDpr pixelated />
         <AdaptiveEvents />
@@ -75,9 +61,11 @@ export default function DeviceModel() {
   );
 }
 
-// ファイル末尾の try...catch ブロックは削除します
-// try {
-//     useGLTF.preload(modelUrl);
-// } catch (error) {
-//     console.error("Failed to preload model:", modelUrl, error);
-// }
+// Preload the model (optional but recommended)
+if (typeof window !== 'undefined') {
+    try {
+        useGLTF.preload('/deviceModel.glb'); // Adjust path
+    } catch (error) {
+        console.error("Failed to preload device model:", error);
+    }
+}
