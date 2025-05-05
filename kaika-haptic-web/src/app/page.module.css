@@ -208,7 +208,12 @@
   box-shadow:0 8px 16px -4px rgba(255,107,0,0.3);
 }
 .deviceVisual{flex:1;min-width:300px;display:flex;justify-content:center;align-items:center;}
-.deviceImage{border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.5);}
+.deviceImage{border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.5);
+display: block;
+max-width: 100%;
+height: auto;
+object-fit: cover;
+}
 
 /* ===== Team ===== */
 .teamSection{position:relative;z-index:5;text-align:center;padding:6rem 2rem;}
@@ -469,3 +474,69 @@
 
 /* Tag Styles */
 
+/* 例: 画面幅が 768px 以下の場合 */
+@media (max-width: 768px) {
+  .catchphrase {
+    font-size: 1.6rem; /* ← スマホ用の文字サイズに調整 (例: 2rem) */
+    line-height: 1.4; /* 必要なら行間も調整 */
+    margin-bottom: 1rem;
+    word-break: break-word; /* 下の余白調整 */
+  }
+
+  .aboutGrid {
+    grid-template-columns: repeat(1, 1fr); /* スマホでは1列 (縦積み) */
+    gap: 1.5rem;
+  }
+
+  .deviceWrap {
+    gap: 2rem;
+    text-align: center; 
+  /* 必要なら中央揃え */
+  }
+
+  .deviceContent, .deviceVisual {
+    flex: 1;         /* 例: 空きスペースを均等に分け合う */
+    /* または flex: 0 0 50%; などで均等分割 */
+    min-width: 0;    /* ★★★ min-width を 0 にして縮小できるようにする ★★★ */
+                     /* または min-width: 140px; など小さい値に */
+    width: auto;     /* 幅の指定をリセットするか、flexに任せる */
+  }
+
+  .deviceImage {
+    width: 90%; /* スマホでは100%幅 */
+    height: auto; /* 高さは自動調整 */
+    max-width: 90%; /* 最大幅を90%に */
+  }
+  .deviceVisual {
+     order: 0; /* 必要なら画像の順序を先頭に */
+  }
+
+  .sectionTitle {
+    font-size: 1.8rem; /* 文字サイズ調整 */
+  }
+
+  /* ヘッダーナビゲーションを隠す例 (別途ハンバーガーメニューの実装が必要) */
+  .header nav {
+    display: none;
+  }
+
+  /* 他の要素の文字サイズ、パディング、マージンなども調整 */
+  .description {
+    font-size: 0.95rem;
+  }
+  .main {
+    padding: 1rem; /* 全体の左右パディングを減らすなど */
+  }
+}
+
+/* 例: さらに小さい画面向け (480px 以下など) */
+@media (max-width: 480px) {
+    .heroCta {
+        flex-direction: column; /* ボタンも縦積みに */
+        gap: 1rem;
+        align-items: center;
+    }
+    .heroCta button {
+        width: 80%; /* ボタン幅調整 */
+    }
+}

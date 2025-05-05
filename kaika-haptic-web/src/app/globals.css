@@ -1,13 +1,24 @@
+/* src/app/globals.css */
+
+/* ===== 基本リセット & フォント ===== */
 html,
-body{
-  margin:0;
-  padding:0;
-  background:#1a1a1a;
-  color:#f1f1f1;
-  font-family:'Inter','SF Pro Display','Roboto',sans-serif;
+body {
+  margin: 0;
+  padding: 0;
+  background: #1a1a1a; /* 基本背景色 */
+  color: #f1f1f1;      /* 基本文字色 */
+  font-family: 'Inter', 'SF Pro Display', 'Roboto', sans-serif; /* 基本フォント */
+  box-sizing: border-box; /* box-sizingリセット */
 }
 
-/* ─── カラーパレットと基本変数 ─── */
+*,
+*::before,
+*::after {
+  box-sizing: inherit; /* 親から継承 */
+}
+
+/* ===== カラーパレットと基本変数 ===== */
+/* :root は一つにまとめる */
 :root {
   --kaika-orange: #ff6b00;
   --kaika-orange-dark: #e65c00;
@@ -15,57 +26,77 @@ body{
   --kaika-orange-light-glow: rgba(255, 107, 0, 0.3);
   --kaika-black: #0A0A0A;
   --kaika-near-black: #111111;
-  --kaika-dark-grey: #1a1a1a; /* パネル背景など */
-  --kaika-mid-grey: #2a2a2a; /* ボーダーや区切り線 */
-  --kaika-light-grey: #aeaeae; /* 通常テキスト */
-  --kaika-white: #f0f0f0; /* 明るいテキスト、ハイライト */
-  --kaika-accent-cyan: #00ffff; /* ネオンアクセント */
+  --kaika-dark-grey: #1a1a1a;
+  --kaika-mid-grey: #2a2a2a;
+  --kaika-light-grey: #aeaeae;
+  --kaika-white: #f0f0f0;
+  --kaika-accent-cyan: #00ffff;
   --kaika-accent-cyan-glow: rgba(0, 255, 255, 0.7);
   --kaika-mint-green: #00ffa3;
-  --kaika-usdc-blue: #2775CA; /* USDCカラー */
+  --kaika-usdc-blue: #2775CA;
   --kaika-usdc-blue-light: #5fa9f8;
   --kaika-font-sans: 'Inter', sans-serif;
   --kaika-font-mono: 'Roboto Mono', monospace;
-  --header-height: 70px; /* ヘッダー高さ */
+  --header-height: 70px;
 }
 
-:root {
-  --kaika-black: #0A0A0A;
-  --kaika-near-black: #111111;
-  --kaika-mid-grey: #2a2a2a;
-}
 
+/* ===== React Modal Animation Styles ===== */
+/* (react-modalが自動付与するデフォルトクラスに対するアニメーション設定) */
+
+/* オーバーレイのトランジション */
 .ReactModal__Overlay {
   opacity: 0;
-  transition: opacity 200ms ease-in-out;
-  background-color: rgba(0, 0, 0, 0.75);
+  transition: opacity 300ms ease-in-out; /* モーダルの closeTimeoutMS と合わせる */
+  /* ↓↓↓ オーバーレイの基本スタイルもここに記述 (module から移動 or 重複定義) ↓↓↓ */
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000; /* Ensure it's on top */
+  inset: 0; /* top: 0; left: 0; right: 0; bottom: 0; */
+  background-color: rgba(0, 0, 0, 0.75); /* 背景色 */
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000; /* 高い z-index */
 }
-
 .ReactModal__Overlay--after-open {
   opacity: 1;
 }
-
 .ReactModal__Overlay--before-close {
   opacity: 0;
 }
 
+/* コンテンツのトランジション */
 .ReactModal__Content {
-  /* Modal自体のスタイルをここに記述 */
-  background: #fff; /* 例 */
-  padding: 20px;   /* 例 */
-  border-radius: 8px; /* 例 */
-  position: relative; /* 相対位置 */
-  inset: auto; /* 初期化 */
-  border: none; /* 初期化 */
+  opacity: 0;
+  transform: scale(.9) translateY(-20px); /* 初期状態 */
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* アニメーション */
+  /* ↓↓↓ コンテンツの基本スタイルもここに記述 (module から移動 or 重複定義) ↓↓↓ */
+  /*
+    注意: ここでコンテンツの基本的な見た目 (背景色、padding, border-radiusなど) も
+    定義することは可能ですが、通常はこれらは `.module.css` のクラスで指定し、
+    ここではアニメーション関連のプロパティ (`opacity`, `transform`, `transition`) と
+    最低限必要な `position` や `overflow` などを定義するのが一般的です。
+    ここではアニメーションのみに絞ります。
+  */
+  position: relative; /* 内部要素の配置基準 */
   overflow: auto; /* 内容が多い場合にスクロール */
-  outline: none; /* フォーカスアウトラインを消す */
+  outline: none; /* フォーカスアウトライン */
+  border: none; /* デフォルトのボーダーを消す */
+  /* background: transparent; */ /* module側で設定する場合 */
+  /* padding: 0; */ /* module側で設定する場合 */
 }
+.ReactModal__Content--after-open {
+  opacity: 1;
+  transform: scale(1) translateY(0); /* 開いた後の状態 */
+}
+.ReactModal__Content--before-close {
+  opacity: 0;
+  transform: scale(.9) translateY(-20px); /* 閉じる前のアニメーション */
+}
+
+/* ===== End React Modal Animation Styles ===== */
+
+/* ===== Wallet Adapter UI Overrides (必要なら) ===== */
+/* .wallet-adapter-button-trigger { ... } */
+
+/* ===== 他のグローバルスタイル ===== */
+/* ... */

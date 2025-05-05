@@ -233,7 +233,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
                <li className={styles.deviceFeature}><span className={styles.featureNumber}>04</span> IP54 Sweat & Dust Resistant</li>
                <li className={styles.deviceFeature}><span className={styles.featureNumber}>05</span> Wireless & Easy Attachment</li>
              </ul>
-             <button className={styles.purchaseButton}>Pre-order Now</button>
+             
            </div>
            <div className={styles.deviceVisual}>
              <Image src="/kaika.jpeg" alt="KAIKA device" width={500} height={400} className={styles.deviceImage} priority/>

@@ -132,3 +132,136 @@
 .submissionStatus.success { color: var(--mint-green); background-color: rgba(0, 255, 163, 0.1); border-color: rgba(0, 255, 163, 0.3); }
 .submissionStatus.error { color: #ff4d4d; background-color: rgba(255, 77, 77, 0.1); border-color: rgba(255, 77, 77, 0.3); }
 .submissionStatus svg { width: 16px; height: 16px; }
+
+/* src/app/app/datacollector/datacollector.module.css */
+
+/* ... 既存のPC向けスタイル ... */
+
+
+/* =========================================== */
+/* === スマホ向けスタイル (例: 768px以下) === */
+/* =========================================== */
+@media (max-width: 768px) {
+
+  /* --- ヘッダー調整 --- */
+  .header {
+    padding: 0 1rem;
+    height: calc(var(--header-height) - 10px);
+  }
+  .nav {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  .navLink {
+    font-size: 0.85rem;
+  }
+  .walletInfo {
+    gap: 0.5rem;
+  }
+  /* 例: スマホではアドレスと残高を隠す */
+  .walletAddress {
+     display: none;
+  }
+  .kaikaBalance {
+     display: none;
+  }
+  .walletButton :global(.wallet-adapter-button-trigger) {
+     font-size: 0.8rem !important;
+     padding: 0.5rem 0.8rem !important;
+  }
+
+  /* --- メインレイアウト: 縦積みに変更 --- */
+  .contentWrapper {
+    flex-direction: column; /* ★ 縦積みに変更 */
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  /* --- コントロールパネル (左側 → 上側) 調整 --- */
+  .controlPanel {
+    flex: none; /* flex比率解除 */
+    width: 100%; /* 幅100% */
+    max-width: none; /* 最大幅解除 */
+    height: auto; /* ★ 高さを自動に */
+    overflow-y: visible; /* スクロール解除 */
+    padding: 1rem;
+    order: 1; /* ★ 表示順序 (上に表示) */
+    /* スクロールバー表示設定 */
+    -ms-overflow-style: auto;
+    scrollbar-width: auto;
+  }
+  .controlPanel::-webkit-scrollbar { display: block; }
+
+  /* パネル内要素の調整 */
+  .panelTitle {
+    font-size: 1.1rem; margin-bottom: 0.6rem; padding-bottom: 0.6rem;
+  }
+  .panelTitle .panelIcon { width: 18px; height: 18px; }
+  .statusCard { padding: 0.8rem 1rem; gap: 0.8rem; }
+  .statusLabel { font-size: 0.7rem; }
+  .statusValue { font-size: 1rem; }
+
+  .terrainSelectorIntegrated .terrainTitle { font-size: 0.75rem; margin-bottom: 0.8rem;}
+  .terrainSelectorIntegrated .terrainOptions { gap: 0.5rem; }
+  .terrainSelectorIntegrated .terrainButton { padding: 0.6rem 0.4rem; }
+  .terrainSelectorIntegrated .terrainIcon { font-size: 1.3rem; }
+  .terrainSelectorIntegrated .terrainLabel { font-size: 0.6rem; }
+
+  .collectionInfo {
+     grid-template-columns: auto 1fr; /* 維持しても良いが、1列にするなら変更 */
+     gap: 0.5rem 0.8rem; padding-top: 1rem;
+  }
+  .infoLabel { font-size: 0.75rem; text-align: left;} /* 左揃えに */
+  .infoValue { font-size: 0.85rem; }
+
+  .statsContainer { gap: 0.5rem; grid-template-columns: 1fr; } /* 1列に変更 */
+  .statCard { padding: 0.6rem; }
+  .statValue { font-size: 1.1rem; }
+  .statLabel { font-size: 0.7rem; }
+
+  .actionButton {
+    padding: 0.8rem 1.2rem; font-size: 0.9rem;
+  }
+
+  .submissionStatus {
+    padding: 0.6rem; font-size: 0.85rem; gap: 0.4rem;
+  }
+  .submissionStatus svg { width: 14px; height: 14px; }
+
+
+  /* --- マップ表示エリア (右側 → 下側) 調整 --- */
+  .dashboardContainer {
+    flex: none; /* flex比率解除 */
+    width: 100%; /* 幅100% */
+    min-width: 0; /* min-width解除 */
+    order: 2; /* ★ 表示順序 (コントロールパネルの下に表示) */
+    /* ★ スマホでの高さを指定 (例) */
+    height: 60vh; /* ビューポートの高さの60% */
+    /* または height: 450px; など固定値 */
+    /* または aspect-ratio: 4 / 3; height: auto; など比率指定 */
+  }
+
+}
+
+/* =========================================== */
+/* === さらに小さい画面向け (例: 480px以下) === */
+/* =========================================== */
+@media (max-width: 480px) {
+   .header { padding: 0 0.8rem; height: calc(var(--header-height) - 15px); }
+   .walletInfo { gap: 0.5rem; }
+   /* 例: ヘッダーの navLink も隠す */
+   .nav { display: none; }
+   .walletButton :global(.wallet-adapter-button-trigger) {
+       font-size: 0.75rem !important; padding: 0.4rem 0.6rem !important;
+   }
+
+   .controlPanel, .dashboardContainer { padding: 0.8rem; }
+   .panelTitle { font-size: 1rem; }
+
+   /* 地形選択ボタンをさらに調整 (例: 1行あたりの数を減らす) */
+   .terrainSelectorIntegrated .terrainOptions { grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); }
+
+   .dashboardContainer {
+      height: 55vh; /* さらに高さを調整 */
+   }
+}
