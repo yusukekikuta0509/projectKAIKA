@@ -13,7 +13,7 @@
    import styles from './page.module.css';
    import { FiMapPin, FiDownloadCloud, FiGift } from 'react-icons/fi';
    // フッター用アイコンのインポート
-   import { FaXTwitter, FaTelegram } from 'react-icons/fa6'; // FaTelegramPlane を FaTelegram に変更
+   import { FaXTwitter} from 'react-icons/fa6'; // FaTelegramPlane を FaTelegram に変更
 import { FaTelegramPlane } from 'react-icons/fa';
 
    /* Wallet ボタンを CSR 専用で読み込む */
