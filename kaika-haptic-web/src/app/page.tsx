@@ -250,7 +250,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
            <Member
             name="Kay"
             role="Co-Founder · PhD (Haptics)"
-            tags={["Crypto", "Superteam Japan Contributor"]} // テキストタグのみ
+            tags={[" Top Haptic Researchers from The #1 University in Japan"]} // テキストタグのみ
             avatar="/kay.jpeg"
             showSuperteamBadge={true} // バッジ表示フラグ追加
           />
