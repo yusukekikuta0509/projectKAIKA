@@ -289,7 +289,8 @@ export default function HapticPage() {
 
       <header className={styles.header}>
         <Link href="/" >
-           <Image src="/kaika_logo.png" alt="KAIKA" width={80} height={80} priority />
+           <Image src="/kaika_logo.png" alt="KAIKA" 
+           width={200} height={23} priority />
         </Link>
         <Link href="/app/datacollector" className={styles.dataCollectorLink}>
          Collect Data

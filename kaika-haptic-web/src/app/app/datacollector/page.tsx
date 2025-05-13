@@ -293,7 +293,8 @@ export default function DataCollectorPage() {
       {/* Header */}
       <header className={styles.header}>
       <Link href="/" >
-           <Image src="/kaika_logo.png" alt="KAIKA" width={80} height={80} priority />
+           <Image src="/kaika_logo.png" alt="KAIKA" 
+           width={200} height={23} priority />
         </Link>
         <nav className={styles.nav}> <Link href="/app/haptic" className={styles.navLink}>Haptic Select</Link> </nav>
         <div className={styles.walletInfo}>

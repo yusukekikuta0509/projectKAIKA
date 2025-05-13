@@ -3,9 +3,8 @@
    ────────────────────────────────────────────── */
    'use client';
 
-   // usePathname フックをインポート
    import { useEffect, useRef, useState, useLayoutEffect } from 'react';
-   import { usePathname } from 'next/navigation'; // <-- インポート追加
+   import { usePathname } from 'next/navigation';
    import dynamic from 'next/dynamic';
    import Link from 'next/link';
    import Image from 'next/image';
@@ -13,34 +12,33 @@
    import { ScrollTrigger } from 'gsap/ScrollTrigger';
    import styles from './page.module.css';
    import { FiMapPin, FiDownloadCloud, FiGift } from 'react-icons/fi';
-   
+   // フッター用アイコンのインポート
+   import { FaXTwitter, FaTelegram } from 'react-icons/fa6'; // FaTelegramPlane を FaTelegram に変更
+import { FaTelegramPlane } from 'react-icons/fa';
+
    /* Wallet ボタンを CSR 専用で読み込む */
    const WalletMultiButton = dynamic(
      () => import('@solana/wallet-adapter-react-ui').then((m) => m.WalletMultiButton),
      { ssr: false }
    );
-   
+
    // GSAPプラグイン登録
    if (typeof window !== "undefined") {
        gsap.registerPlugin(ScrollTrigger);
    }
-   
-   
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function debounce<Params extends any[], Func extends (...args: Params) => void>(func: Func, waitFor: number) {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  // ↓ Parameters<T> を Params に変更
   const debounced = (...args: Params): void => {
     if (timeoutId !== null) { clearTimeout(timeoutId); }
     timeoutId = setTimeout(() => { timeoutId = null; func(...args); }, waitFor);
   };
-  // ↓ clear の型アサーションはそのまま
   (debounced as any).clear = () => { if (timeoutId !== null) { clearTimeout(timeoutId); timeoutId = null; } };
-  // ↓ 戻り値の型アサーションを少し具体的に (必須ではない)
   return debounced as Func & { clear?: () => void };
 }
-   
-   
+
+
    export default function MainPage() {
      /* ───── Refs ───── */
      const mainRef = useRef<HTMLDivElement>(null);
@@ -49,18 +47,18 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
      const teamRef   = useRef<HTMLDivElement>(null);
      const launchRef = useRef<HTMLDivElement>(null);
      const gradRef   = useRef<HTMLDivElement>(null);
-   
+
      /* ───── Hooks ───── */
      const pathname = usePathname(); // 現在のパスを取得
      const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
-   
+
      /* ───── 背景グラデーション (マウス追従) ───── */
      useEffect(() => {
       const move = (e: MouseEvent) => setMouse({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
       window.addEventListener('mousemove', move);
       return () => window.removeEventListener('mousemove', move);
-  }, []);
-   
+    }, []);
+
      useEffect(() => {
        if (!gradRef.current) return;
        gsap.to(gradRef.current, {
@@ -69,38 +67,34 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
            ease: 'power2.out'
        });
      }, [mouse]);
-   
+
      /* ───── GSAP Animations with Context & Pathname Dependency ───── */
-     // useLayoutEffect を使用し、依存配列に pathname を追加
      useLayoutEffect(() => {
        console.log("Setting up GSAP context for path:", pathname); // デバッグログ
-   
+
        const ctx = gsap.context(() => {
-         // requestAnimationFrame で1フレーム待って初期化
-        
            console.log("Initializing GSAP animations...");
-   
+
            // --- アニメーション設定 ---
            /* Hero Animation */
            gsap.fromTo(`.${styles.catchphrase}`, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1 });
            gsap.fromTo(`.${styles.description}`, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.2 });
            gsap.fromTo(`.${styles.heroCta} > *`, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.15, delay: 0.3 });
-   
+
            /* 共通タイトルアニメ */
            const animateTitle = (el: Element | null) => {
              if (el) {
-               // fromTo を使用して初期状態を確実に設定
                gsap.fromTo(el, { y: 40, opacity: 0 }, {
                  y: 0, opacity: 1, duration: 0.7, ease: 'power3.out',
                  scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none', invalidateOnRefresh: true }
                });
              } else { console.warn("animateTitle: Element not found"); }
            };
-           
+
            /* About Section Animation */
            animateTitle(aboutRef.current?.querySelector(`.${styles.sectionTitle}`) ?? null);
-           const aboutCards = aboutRef.current 
-               ? gsap.utils.toArray(aboutRef.current.querySelectorAll(`.${styles.aboutCard}`)) 
+           const aboutCards = aboutRef.current
+               ? gsap.utils.toArray(aboutRef.current.querySelectorAll(`.${styles.aboutCard}`))
                : [];
            if (aboutCards.length > 0) {
              gsap.fromTo(aboutCards, { y: 40, opacity: 0, scale: 0.95 }, {
@@ -108,7 +102,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
                scrollTrigger: { trigger: aboutRef.current, start: 'top 85%', toggleActions: 'play none none none', invalidateOnRefresh: true }
              });
            } else { console.warn("About cards not found"); }
-   
+
            /* Device Section Animation */
            if (deviceRef.current) {
              animateTitle(deviceRef.current.querySelector(`.${styles.catchphrase}`));
@@ -117,11 +111,11 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
              gsap.fromTo(deviceRef.current.querySelector(`.${styles.purchaseButton}`), { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.2, scrollTrigger: { trigger: deviceRef.current.querySelector(`.${styles.purchaseButton}`), start: 'top 95%', toggleActions: 'play none none none', invalidateOnRefresh: true } });
              gsap.fromTo(deviceRef.current.querySelector(`.${styles.deviceVisual}`), { x: 50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: deviceRef.current, start: 'top 85%', toggleActions: 'play none none none', invalidateOnRefresh: true } });
            } else { console.warn("Device section ref not found"); }
-   
+
            /* Team Section Animation */
            animateTitle(teamRef.current?.querySelector(`.${styles.sectionTitle}`) ?? null);
-           const teamCards = teamRef.current 
-               ? gsap.utils.toArray(teamRef.current.querySelectorAll(`.${styles.memberCard}`)) 
+           const teamCards = teamRef.current
+               ? gsap.utils.toArray(teamRef.current.querySelectorAll(`.${styles.memberCard}`))
                : [];
            if (teamCards.length > 0) {
              gsap.fromTo(teamCards, { opacity: 0, y: 40 }, {
@@ -129,7 +123,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
                scrollTrigger: { trigger: teamRef.current, start: 'top 85%', toggleActions: 'play none none none', invalidateOnRefresh: true },
              });
            } else { console.warn("Team cards not found"); }
-   
+
            /* CTA Section Animation */
            if (launchRef.current) {
              animateTitle(launchRef.current.querySelector(`.${styles.launchTitle}`));
@@ -138,7 +132,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
                scrollTrigger: { trigger: launchRef.current, start: 'top 85%', toggleActions: 'play none none none', invalidateOnRefresh: true }
              });
            } else { console.warn("Launch section ref not found"); }
-   
+
            /* ScrollTrigger Refresh Handling */
            const refreshScrollTriggers = () => {
                console.log("Refreshing ScrollTriggers...");
@@ -147,44 +141,38 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
            const debouncedRefresh = debounce(refreshScrollTriggers, 300);
            window.addEventListener('resize', debouncedRefresh);
            let refreshTimeoutId: NodeJS.Timeout | null = setTimeout(refreshScrollTriggers, 500); // Initial refresh delay
-   
-         
-   
+
            console.log("GSAP animations initialized.");
            return () => {
-            // この関数は、gsap.context が revert される際や、
-            // 依存配列 [pathname] が変わってエフェクトが再実行される「前」に呼ばれる
             console.log("Cleaning up listeners and timeouts inside GSAP context");
-            clearTimeout(refreshTimeoutId as NodeJS.Timeout); // タイマーをクリア
+            if (refreshTimeoutId) clearTimeout(refreshTimeoutId);
             refreshTimeoutId = null;
-            window.removeEventListener('resize', debouncedRefresh); // リスナーを削除
-            debouncedRefresh.clear?.(); // debounceのタイマーもクリア
+            window.removeEventListener('resize', debouncedRefresh);
+            debouncedRefresh.clear?.();
         };
-
-   
        }, mainRef); // GSAP Context scope
-   
-       // --- クリーンアップ関数 ---
+
        return () => {
-           console.log("GSAP Context revert start for path:", pathname); // パス名もログに出す
-           // cancelAnimationFrame(animFrameId); // requestAnimationFrame をクリア (通常 ctx.revert() で不要)
-           ctx.revert(); // GSAP Context のアニメーションとトリガーを破棄
-           // ScrollTrigger.killAll(); // ★ 必要であれば試す (他のページに影響する可能性あり)
+           console.log("GSAP Context revert start for path:", pathname);
+           ctx.revert();
            console.log("GSAP Context revert complete");
        };
-     }, [pathname]); // ★★★ 依存配列に pathname を追加 ★★★
-   
-   
+     }, [pathname]);
+
+     // XとTelegramのURL (実際のURLに置き換えてください)
+     const X_ACCOUNT_URL = "https://x.com/kaika_haptics"; // 例: ご自身のXアカウントURL
+     const TELEGRAM_ACCOUNT_URL = "https://t.me/+SNruvimyV29hZDZl"; // 例: ご自身のTelegramチャンネルURL
+
      /* ───── JSX ───── */
      return (
        <div className={styles.main} ref={mainRef}>
          {/* 背景 */}
-         <div ref={gradRef} className={styles.gradientBackground} aria-hidden />
-         <div className={styles.dotGrid} aria-hidden />
-   
+         <div ref={gradRef} className={styles.gradientBackground} aria-hidden="true" />
+         <div className={styles.dotGrid} aria-hidden="true" />
+
          {/* Header */}
          <header className={styles.header}>
-           <Image src="/kaika_logo.png" alt="KAIKA" width={80} height={80} priority />
+           <Image src="/kaika_logo.png" alt="KAIKA" width={200} height={23} priority />
            <nav>
              <Link href="#about" className={styles.navLink} >About</Link>
              <Link href="#device" className={styles.navLink}>Device</Link>
@@ -192,7 +180,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
            </nav>
            <WalletMultiButton className={styles.walletButton} />
          </header>
-   
+
          {/* Hero */}
          <section className={styles.hero}>
            <h1 className={styles.catchphrase}>Bring the beach to your treadmill with haptic soles</h1>
@@ -205,7 +193,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
              <Link href="#device" scroll={false}><button className={styles.secondaryButton}>Learn More</button></Link>
            </div>
          </section>
-   
+
          {/* About (内容変更済み) */}
          <section id="about" ref={aboutRef} className={styles.aboutSection}>
            <h2 className={styles.sectionTitle}>How KAIKA Works</h2>
@@ -221,7 +209,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
              </AboutCard>
            </div>
          </section>
-   
+
          {/* Device */}
          <section id="device" ref={deviceRef} className={`${styles.deviceSection} ${styles.deviceWrap}`}>
            <div className={styles.deviceContent}>
@@ -233,13 +221,12 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
                <li className={styles.deviceFeature}><span className={styles.featureNumber}>04</span> IP54 Sweat & Dust Resistant</li>
                <li className={styles.deviceFeature}><span className={styles.featureNumber}>05</span> Wireless & Easy Attachment</li>
              </ul>
-             
            </div>
            <div className={styles.deviceVisual}>
              <Image src="/kaika.jpeg" alt="KAIKA device" width={500} height={400} className={styles.deviceImage} priority/>
            </div>
          </section>
-   
+
          {/* Team */}
          <section id="team" ref={teamRef} className={styles.teamSection}>
            <h2 className={styles.sectionTitle}>Our Team</h2>
@@ -250,38 +237,56 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
            <Member
             name="Kay"
             role="Co-Founder · PhD (Haptics)"
-            tags={[" Top Haptic Researchers from The #1 University in Japan"]} // テキストタグのみ
+            tags={["Top Haptic Researchers from The #1 University in Japan"]}
             avatar="/kay.jpeg"
-            showSuperteamBadge={true} // バッジ表示フラグ追加
+            showSuperteamBadge={true}
           />
           <Member
             name="Yusuke"
             role="Co-Founder · Web3 Lead"
-            tags={["Solana Developer", "Ex-Music Univ."]} // Superteam Contributor はバッジで示す
+            tags={["Solana Developer", "Ex-Music Univ."]}
             avatar="/yusuke.jpg"
-            showSuperteamBadge={true} // バッジ表示フラグ追加
+            showSuperteamBadge={true}
           />
           <Member
             name="Zen"
-            role="Co-Founder · Global Biz-Dev" // Global Biz-Dev に変更例
-            tags={["PhD Candidate (Haptics & HCI)", "Trilingual"]} // Superteam Contributor はバッジで示す
-            avatar="/zen.jpg" // 画像パス確認
-            showSuperteamBadge={true} // バッジ表示フラグ追加
+            role="Co-Founder · Global Biz-Dev"
+            tags={["PhD Candidate (Haptics & HCI)", "Trilingual"]}
+            avatar="/zen.jpg"
+            showSuperteamBadge={true}
           />
-                    </div>
+            </div>
          </section>
-   
+
          {/* CTA */}
          <section ref={launchRef} className={styles.launchSection}>
            <h2 className={styles.launchTitle}>Ready to Feel the Difference?</h2>
            <Link href="/app/haptic"><button className={styles.launchButton}>Launch KAIKA App</button></Link>
          </section>
-   
-         
+
+         {/* Footer */}
+         <footer className={styles.footer}>
+           <div className={styles.footerContent}>
+             <div className={styles.socialLinks}>
+               <a href={X_ACCOUNT_URL} target="_blank" rel="noopener noreferrer" className={styles.socialLink} aria-label="KAIKA on X">
+                 <FaXTwitter size={24} />
+                 {/* <span>Follow on X</span> */} {/* テキストラベルが必要な場合はコメント解除 */}
+               </a>
+               <a href={TELEGRAM_ACCOUNT_URL} target="_blank" rel="noopener noreferrer" className={styles.socialLink} aria-label="KAIKA on Telegram">
+                 <FaTelegramPlane size={24} />
+                 {/* <span>Join on Telegram</span> */} {/* テキストラベルが必要な場合はコメント解除 */}
+               </a>
+             </div>
+             <div className={styles.copyright}>
+               <p>&copy; {new Date().getFullYear()} KAIKA. All Rights Reserved.</p>
+             </div>
+           </div>
+         </footer>
+
        </div>
      );
    }
-   
+
    const AboutCard = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (
     <div className={styles.aboutCard}>
       <span className={styles.featureIcon}>{icon}</span>
@@ -289,28 +294,25 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
       <p>{children}</p>
     </div>
   );
-  
-  // Member コンポーネントに showSuperteamBadge prop を追加
+
   const Member = ({ name, role, avatar, tags, showSuperteamBadge }: {
       name: string;
       role: string;
       avatar: string;
       tags?: string[];
-      showSuperteamBadge?: boolean; // バッジ表示を制御するフラグ
+      showSuperteamBadge?: boolean;
   }) => (
     <div className={styles.memberCard}>
       <div className={styles.avatarWrapper}>
           <Image src={avatar} alt={name} width={88} height={88} className={styles.memberAvatar} unoptimized={true} />
-          {/* showSuperteamBadgeがtrueの場合にバッジを表示 */}
           {showSuperteamBadge && (
               <Image
-                  // ★★★ Superteam Japan ロゴ画像のパス (publicディレクトリ内) ★★★
                   src="/superteam.png"
                   alt="Superteam Japan Contributor"
-                  width={68} // バッジのサイズ調整
+                  width={68}
                   height={68}
-                  className={styles.superteamBadge} // 新しいCSSクラス
-                  title="Superteam Japan Contributor" // ツールチップ
+                  className={styles.superteamBadge}
+                  title="Superteam Japan Contributor"
               />
           )}
       </div>

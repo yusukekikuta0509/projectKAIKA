@@ -528,6 +528,64 @@ object-fit: cover;
     padding: 1rem; /* 全体の左右パディングを減らすなど */
   }
 }
+/* ──────────────────────────────────────────────
+   ↓↓↓ フッタースタイル (既存の変数と整合性をとって調整) ↓↓↓
+   ────────────────────────────────────────────── */
+   .footer {
+    background-color: color-mix(in srgb, var(--bg-color) 85%, black); /* メイン背景より少し暗く */
+    /* 代替案として固定色: background-color: #0f0f0f; */
+    color: var(--text-secondary);
+    padding: 2.5rem 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto; /* .main が flex-direction: column なので機能する */
+    width: 100%;
+    z-index: 10; /* 他の要素より手前に来るように（必要に応じて） */
+  }
+  
+  .footerContent {
+    max-width: 1100px; /* ページ全体のコンテンツ幅と合わせることを推奨 */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .socialLinks {
+    display: flex;
+    gap: 1.5rem; /* アイコン間のスペースを少し広げる */
+    align-items: center;
+  }
+  
+  .socialLink {
+    color: var(--text-secondary);
+    text-decoration: none;
+    display: inline-flex; /* アイコンの垂直中央揃えのため */
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem; /* クリック/タップ領域と見た目のバランス */
+    border-radius: 50%; /* アイコンを円で囲むスタイルにする場合 */
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .socialLink:hover {
+    color: var(--primary-light); /* ホバー時の色を primary-light に */
+    background-color: rgba(255, 255, 255, 0.05); /* 既存の .secondaryButton:hover の背景色に近いもの */
+  }
+  
+  /* react-icons を使用する場合、アイコンのサイズはコンポーネント側でprops (例: size={24}) で指定するため、
+     CSSでの .socialLink svg に対する直接的なサイズ指定は通常不要です。
+     色も親要素の color を継承します。 */
+  
+  .copyright {
+    font-size: 0.875rem; /* 少し小さめのフォントサイズ */
+  }
+  
+  .copyright p {
+    margin: 0;
+  }
+  
 
 /* 例: さらに小さい画面向け (480px 以下など) */
 @media (max-width: 480px) {
@@ -538,5 +596,16 @@ object-fit: cover;
     }
     .heroCta button {
         width: 80%; /* ボタン幅調整 */
+    }
+    .footerContent {
+      flex-direction: row; /* PCなどでは横並びに */
+      justify-content: space-between; /* 両端揃え */
+      text-align: left; /* テキストを左揃えに */
+    }
+    .socialLinks {
+      order: 1; /* ソーシャルリンクを右側に配置 (任意) */
+    }
+    .copyright {
+      order: 0; /* コピーライトを左側に配置 (任意) */
     }
 }
