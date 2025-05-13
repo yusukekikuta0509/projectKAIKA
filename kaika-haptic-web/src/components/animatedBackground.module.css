@@ -1,164 +1,22 @@
-/* src/components/animatedBackground.module.css */
-/* ★★★ Ensure these variables are defined globally or here ★★★ */
-
-  
-  .backgroundContainer {
+/* src/components/AnimatedBackground.module.css */
+.videoBackgroundContainer {
     position: fixed;
-    inset: 0;
-    z-index: -2; /* Behind dotGrid, Above potential body background */
-    overflow: hidden;
-    background-color: var(--kaika-black);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -3; /* 他の背景要素 (dotGrid, particleContainer) よりも奥に配置 */
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out; /* フェードインのアニメーション（1.5秒） */
+    background-color: #000; /* 動画がロードされるまでの間の背景色 */
   }
   
-  .backgroundLayer {
-    position: absolute;
-    inset: 0;
-    opacity: 1; /* Controlled by AnimatePresence */
-    background-size: cover;
+  .videoBackgroundContainer.loaded {
+    opacity: 1; /* 動画がロードされたら表示 */
   }
   
-  .svgCanvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-  }
-  
-  .dotGrid {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(var(--kaika-mid-grey) 0.5px, transparent 0.5px);
-    background-size: 15px 15px;
-    opacity: 0.08;
-    z-index: 1; /* Above animated background */
-    pointer-events: none;
-  }
-  
-  /* --- Default Background --- */
-  .defaultBg {
-     background: radial-gradient(ellipse at bottom, var(--kaika-near-black) 0%, var(--kaika-black) 80%);
-  }
-  
-  /* ============ Beach Waves Animation ============ */
-  .beachBg {
-      /* Base color can be set here if SVG doesn't cover all */
-      /* background: linear-gradient(to bottom, #87CEEB, #003d66); */
-  }
-  .wavePath {
-    fill: url(#waveGradient); /* Defined in BeachWaves SVG */
-    filter: url(#waterDisplacement); /* Defined in BeachWaves SVG */
-  }
-  .wave1 { opacity: 0.6; animation: waveFlow1 15s ease-in-out infinite alternate; }
-  .wave2 { opacity: 0.5; animation: waveFlow2 22s ease-in-out infinite alternate; }
-  .wave3 { opacity: 0.4; animation: waveFlow1 30s ease-in-out infinite alternate-reverse; }
-  .wave4 { opacity: 0.3; animation: waveFlow2 25s ease-in-out infinite alternate-reverse; }
-  .wave5 { opacity: 0.2; animation: waveFlow1 40s ease-in-out infinite alternate; }
-  
-  @keyframes waveFlow1 {
-    from { transform: translateX(0%); }
-    to { transform: translateX(-12%); } /* Adjust movement based on viewBox */
-  }
-  @keyframes waveFlow2 {
-    from { transform: translateX(0%); }
-    to { transform: translateX(9%); } /* Adjust movement based on viewBox */
-  }
-  
-  /* ============ Nature Animation ============ */
-  .natureBg { /* Base gradient for nature */
-       background: linear-gradient(135deg, #223a2f, #3a5e4a, #5a8f6e);
-  }
-  .natureContainer {
-      position: absolute; inset: 0; overflow: hidden;
-  }
-  .leaf {
-      position: absolute; font-size: 1.5rem; color: #a5d6a7; opacity: 0;
-      animation: leafFall 15s linear infinite, leafSway 3s ease-in-out infinite alternate;
-  }
-  /* More variation in leaf animations */
-  .leaf1 { left: 10%; animation-delay: -2s; animation-duration: 18s, 2.5s; }
-  .leaf2 { left: 30%; animation-delay: 3s; animation-duration: 15s, 3.5s; transform: scale(0.8); }
-  .leaf3 { left: 70%; animation-delay: 6s; animation-duration: 22s, 3s; transform: scale(1.1); }
-  .leaf4 { left: 85%; animation-delay: 1s; animation-duration: 16s, 2.8s; transform: scale(0.9); }
-  .leaf5 { left: 50%; animation-delay: 9s; animation-duration: 19s, 3.2s; transform: scale(1.0); }
-  /* Add more .leaf styles if needed */
-  
-  @keyframes leafFall {
-      0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 0.8; } /* Fade in quicker */
-      90% { opacity: 0.6; } /* Stay visible longer */
-      100% { transform: translateY(110vh) rotate(480deg); opacity: 0; } /* More rotation */
-  }
-  @keyframes leafSway {
-      from { transform: translateX(0px) rotate(-5deg); }
-      to { transform: translateX(10px) rotate(5deg); }
-  }
-  
-  /* Light Rays */
-  .lightRay1, .lightRay2 {
-      position: absolute;
-      top: -10%;
-      width: 1px;
-      height: 120%;
-      background: linear-gradient(to bottom, rgba(255, 255, 200, 0.2), transparent);
-      opacity: 0;
-      animation: lightSweep 25s ease-in-out infinite;
-  }
-  .lightRay1 { left: 20%; transform: rotate(-20deg); animation-delay: 0s;}
-  .lightRay2 { left: 70%; transform: rotate(15deg); animation-delay: 8s; }
-  
-  @keyframes lightSweep {
-      0%, 100% { opacity: 0; transform: rotate(-20deg) scaleY(1); }
-      50% { opacity: 0.5; transform: rotate(-15deg) scaleY(1.1); }
-  }
-  
-  /* ============ Urban Lines Animation ============ */
-  .urbanBg { background-color: #080c1a; } /* Dark blue/black base */
-  .urbanContainer { /* Optional wrapper */ }
-  .urbanLine {
-      /* stroke is defined by gradient in SVG defs */
-      stroke-width: 0.5; /* Thinner lines */
-      stroke-linecap: round;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-      filter: drop-shadow(0 0 3px rgba(80, 200, 255, 0.5)); /* Add glow */
-  }
-  .urbanLine1 { stroke: url(#urbanLineGradient); animation: urbanFlow1 5s infinite; }
-  .urbanLine2 { stroke: url(#urbanLineGradient2); animation: urbanFlow2 7s infinite; } /* Use second gradient */
-  .urbanLine3 { stroke: url(#urbanLineGradient); animation: urbanFlow1 6s infinite reverse; animation-delay: 0.5s;}
-  .urbanLine4 { stroke: url(#urbanLineGradient2); animation: urbanFlow2 9s infinite reverse; animation-delay: 1s;}
-  .urbanLine5 { stroke: url(#urbanLineGradient); animation: urbanFlowDiag1 10s infinite; stroke-width: 0.3;}
-  .urbanLine6 { stroke: url(#urbanLineGradient2); animation: urbanFlowDiag2 12s infinite; stroke-width: 0.3;}
-  
-  @keyframes urbanFlow1 {
-      from { stroke-dasharray: 70 180; stroke-dashoffset: 250; } /* Adjust dash pattern */
-      to { stroke-dasharray: 70 180; stroke-dashoffset: -250; }
-  }
-  @keyframes urbanFlow2 {
-      from { stroke-dasharray: 40 210; stroke-dashoffset: -250; } /* Different dash pattern */
-      to { stroke-dasharray: 40 210; stroke-dashoffset: 250; }
-  }
-  @keyframes urbanFlowDiag1 {
-      from { stroke-dasharray: 100 300; stroke-dashoffset: 400; }
-      to { stroke-dasharray: 100 300; stroke-dashoffset: -400; }
-  }
-  @keyframes urbanFlowDiag2 {
-      from { stroke-dasharray: 80 320; stroke-dashoffset: -400; }
-      to { stroke-dasharray: 80 320; stroke-dashoffset: 400; }
-  }
-  
-  
-  /* ============ Abstract Flow Animation ============ */
-  .abstractBg { /* Base style needed if container doesn't cover */ }
-  .abstractContainer {
-      position: absolute; inset: 0;
-      background: linear-gradient(75deg, #4a0e61, #2c3e50, #8e44ad, #3498db, #4a0e61); /* More colors */
-      background-size: 400% 400%; /* Larger size for smoother flow */
-      animation: abstractGradient 25s ease infinite alternate;
-      /* Apply SVG filter if defined */
-      /* filter: url(#abstractWarp); */
-  }
-  @keyframes abstractGradient {
-      0% { background-position: 0% 50%; filter: hue-rotate(0deg) saturate(1.2); }
-      50% { background-position: 100% 50%; filter: hue-rotate(60deg) saturate(1.5); }
-      100% { background-position: 0% 50%; filter: hue-rotate(0deg) saturate(1.2); }
+  .backgroundVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ビデオのアスペクト比を維持しつつ、コンテナ全体をカバー */
   }

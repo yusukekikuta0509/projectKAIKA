@@ -1,39 +1,55 @@
-// eslint.config.mjs (ファイル名が .mjs でもこの内容でOK)
+// eslint.config.mjs
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import typescriptParser from "@typescript-eslint/parser";
 import typescriptPlugin from "@typescript-eslint/eslint-plugin";
 
-const __filename = fileURLToPath(import.meta.url); // MJS形式でのパス取得
-const __dirname = dirname(__filename);            // MJS形式でのパス取得
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
-  // resolvePluginsRelativeTo: __dirname,
 });
 
-const eslintConfig = [
-  // 元々の Next.js 推奨設定
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+export default [
+  // Next.js の基本設定を適用
+  ...compat.extends("next/core-web-vitals"),
+  ...compat.extends("next/typescript"), // これには TypeScript パーサーやプラグインの推奨設定が含まれます
 
-  // ルールの上書き設定
+  // カスタムルールの上書き/追加
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["**/*.ts", "**/*.tsx"], // TypeScript ファイルに適用
+    // "next/typescript" でパーサーやプラグインは設定されているはずですが、
+    // 明示的に指定することで意図を明確にします。
     languageOptions: {
         parser: typescriptParser,
         parserOptions: {
-            // project: "./tsconfig.json" // 必要に応じてパスを確認
+            // project: "./tsconfig.json", // 型情報を使った Lint を行う場合は有効化
         }
     },
     plugins: {
         "@typescript-eslint": typescriptPlugin
     },
     rules: {
-        // anyルールを警告(warn)に変更
-        "@typescript-eslint/no-explicit-any": "warn",
+      // 既存の "next/typescript" のルール設定に対して、以下のルールを上書き・追加します。
+
+      // any の使用は警告 (warn) に設定 (既存の通り)
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      // 未使用変数のルールをカスタマイズ
+      "@typescript-eslint/no-unused-vars": [
+        "error", // 未使用変数はエラーとする (ビルド失敗の原因)
+        {
+          "vars": "all", // ローカル変数、グローバル変数すべてをチェック
+          "args": "after-used", // 最後の使用された引数以降の未使用引数をチェック
+          "ignoreRestSiblings": true, // 分割代入の残りの未使用プロパティを無視 (例: const { a, ...rest } = obj;)
+          "argsIgnorePattern": "^_",    // アンダースコアで始まる引数を無視
+          "varsIgnorePattern": "^_",    // アンダースコアで始まる変数を無視
+          "caughtErrorsIgnorePattern": "^_" // アンダースコアで始まるcatch節のエラー変数を無視
+        }
+      ]
+      // 他に "next/typescript" のルールで変更したいものがあればここに追加
     }
   }
 ];
-
-export default eslintConfig; // MJS形式でのエクスポート

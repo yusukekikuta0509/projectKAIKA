@@ -3,28 +3,58 @@
 
 /* ─── Main Layout & Backgrounds ─── */
 .main {
-  background-color: transparent;
-  color: var(--kaika-white); /* デフォルト文字色を明るく */
+  background-color: #0A0A0A; /* ベースの背景色を濃いグレーに */
+  color: var(--kaika-white);
   min-height: 100vh;
   font-family: var(--kaika-font-sans);
-  position: relative; /* For fixed/absolute children */
+  position: relative;
   overflow-x: hidden;
-  display: flex; /* Use flex to manage header and content */
+  display: flex;
   flex-direction: column;
-  Z-index: 0; /* Ensure main is below header */
+  /* z-index: 0; は意図に応じて調整、または削除 */
 }
 
-/* --- AnimatedBackground コンポーネントが背景を担当 --- */
-/* 以前の .gradientBackground, .backgroundVideoContainer, .backgroundVideo は削除 */
+.backgroundVideo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 0; /* 他の背景要素よりも奥 */
+  opacity: 0; /* ★ 初期状態は透明 */
+  transition: opacity 1.5s ease-in-out; /* ★ フェードインのためのトランジション */
+  /* filter: brightness(0.7); /* Optional: 動画の明るさを調整する場合 */
+}
 
-/* ドットグリッド (AnimatedBackground コンポーネントの CSS に移動推奨だが、ここに残す場合) */
+/* isPlaying ステートが true のときに適用されるスタイル */
+/* page.tsx の className={`${styles.backgroundVideo} ${isPlaying ? styles.playing : ''}`} に対応 */
+.backgroundVideo.playing {
+  opacity: 1; /* ★ isPlaying が true になったら動画を表示（不透明に） */
+}
+
+/*
+  以前の .videoLoaded クラスに基づくスタイルです。
+  現在の page.tsx では videoLoaded state は className に直接使われていませんが、
+  onCanPlay で true に設定されています。
+  もし videoLoaded state を使った別の視覚効果を実装したい場合は、
+  この定義を調整して活用できます。
+  現状の isPlaying による制御と重複しないように注意してください。
+*/
+/*
+.backgroundVideo.videoLoaded {
+  opacity: 1;
+}
+*/
+
+/* ドットグリッド */
 .dotGrid {
-  position: fixed; /* or absolute if .main is the reference */
+  position: fixed;
   inset: 0;
   background-image: radial-gradient(var(--kaika-mid-grey) 0.5px, transparent 0.5px);
   background-size: 15px 15px;
-  opacity: 0.08; /* 少し濃く */
-  z-index: -2; /* 背景アニメーションよりさらに後ろ */
+  opacity: 0.08;
+  z-index: -2; /* 動画の上、パーティクルの下 */
   pointer-events: none;
 }
 
@@ -32,15 +62,14 @@
 .particleContainer {
   position: fixed;
   inset: 0;
-  z-index: -1; /* ドットグリッドと背景アニメの間 */
+  z-index: -1; /* ドットグリッドの上、コンテンツ要素の下 */
   pointer-events: none;
   overflow: hidden;
 }
 .particleEffect {
   position: absolute;
-  width: 4px; /* Smaller particles */
+  width: 4px;
   height: 4px;
-  /* CSS変数 --haptic-color を参照 */
   background-color: var(--haptic-color, rgba(255, 107, 0, .15));
   border-radius: 50%;
   opacity: 0;
@@ -50,16 +79,18 @@
   transition: background-color 0.5s ease;
 }
 .particleEffect.active {
-   /* CSS変数 --haptic-intensity を参照 */
    opacity: calc(var(--haptic-intensity, 0.5) * 0.7 + 0.1);
    animation-duration: calc(25s / (var(--haptic-intensity, 0.5) + 0.5));
 }
-.particleEffect::before, .particleEffect::after { /* Example */
-    content: ''; position: absolute; width: 100%; height: 100%;
-    background: inherit; border-radius: inherit; opacity: inherit; filter: inherit; animation: inherit;
-}
-.particleEffect::before { animation-delay: -6s; left: 30%; top: 70%; width: 3px; height: 3px; }
-.particleEffect::after { animation-delay: -11s; left: 65%; top: 40%; width: 5px; height: 5px; }
+/*
+  .particleEffect::before, .particleEffect::after は page.tsx 側で
+  個別要素としてレンダリングする形に変更したため、ここではコメントアウトします。
+  もしCSSで疑似要素を使う場合は、このコメントを解除してください。
+*/
+/*
+.particleEffect::before { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; opacity: inherit; filter: inherit; animation: inherit; animation-delay: -6s; left: 30%; top: 70%; width: 3px; height: 3px; }
+.particleEffect::after { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; opacity: inherit; filter: inherit; animation: inherit; animation-delay: -11s; left: 65%; top: 40%; width: 5px; height: 5px; }
+*/
 
 @keyframes particle-float {
   0% { transform: translateY(0vh) translateX(0vw) scale(0.8); opacity: 0.1; }
@@ -73,21 +104,19 @@
   padding: 0 2rem;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Logo left, Info right */
+  justify-content: space-between;
   background-color: rgba(10, 10, 10, 0.75);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
-  z-index: 100;
-  border-bottom: 1px solid rgba(255, 107, 0, 0.15); /* オレンジ境界線 */
+  z-index: 100; /* ヘッダーは最前面 */
+  border-bottom: 1px solid rgba(255, 107, 0, 0.15);
 }
 
-.logo { /* Link Component */
-    display: block; /* Prevents potential layout shifts with Image */
-    line-height: 0; /* Remove extra space below image */
-    margin-right: 1rem; /* Space after logo */
+.logoImg { /* Next/Image を使う場合、直接スタイルを適用するか、親要素で制御 */
+    /* サイズは Image コンポーネントの width/height props で指定 */
 }
-/* Next/Image needs no specific style here if width/height provided */
+
 
 /* データコレクターへのリンク */
 .dataCollectorLink {
@@ -98,8 +127,8 @@
   padding: 0.4rem 1rem;
   border-radius: 6px;
   transition: color 0.2s ease, background-color 0.2s ease;
-  margin-left: auto; /* Push itself right, creating space after logo */
-  margin-right: 1.5rem; /* Space before wallet info */
+  margin-left: auto;
+  margin-right: 1.5rem;
   white-space: nowrap;
 }
 .dataCollectorLink:hover {
@@ -122,7 +151,7 @@
 }
 .balanceItem { display: flex; flex-direction: column; align-items: flex-end; }
 .balanceLabel { font-size: 0.7rem; color: var(--kaika-light-grey); text-transform: uppercase; }
-.balanceValue { font-weight: 700; font-size: 0.9rem; color: var(--kaika-usdc-blue-light); } /* USDC */
+.balanceValue { font-weight: 700; font-size: 0.9rem; color: var(--kaika-usdc-blue-light); }
 .kaikaBalance { font-weight: 700; font-size: 0.9rem; color: var(--kaika-orange); }
 .walletAddress {
   background-color: rgba(255, 255, 255, 0.08); padding: 0.4rem 0.8rem; border-radius: 6px;
@@ -131,9 +160,8 @@
 }
 .walletAddress:hover { background-color: rgba(255, 255, 255, 0.15); }
 
-/* デバイス接続ボタン */
 .connectDeviceButton {
-  background: rgba(42, 42, 42, 0.8); /* Darker background */
+  background: rgba(42, 42, 42, 0.8);
   border: 1px solid var(--kaika-mid-grey);
   color: var(--kaika-light-grey);
   padding: 0.5rem 1rem;
@@ -157,8 +185,7 @@
 .connectionSpinner { border: 2px solid rgba(0, 255, 163, 0.3); border-top: 2px solid var(--kaika-mint-green); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* WalletMultiButton */
-.walletButton {} /* Wrapper class */
+.walletButton {}
 .walletButton :global(.wallet-adapter-button-trigger) {
     background-color: var(--kaika-orange) !important; color: var(--kaika-black) !important; border: none !important;
     border-radius: 6px !important; padding: 0.6rem 1rem !important; font-weight: 700 !important;
@@ -168,40 +195,39 @@
     background-color: var(--kaika-orange-dark) !important; transform: scale(1.03);
 }
 
-
 /* ─── Content Wrapper & Layout ─── */
 .contentWrapper {
-  flex: 1; display: flex; padding: 2rem 1.5rem; /* Consistent padding */
+  flex: 1; display: flex; padding: 2rem 1.5rem;
   max-width: 1600px; width: 100%; margin: 0 auto; gap: 2rem;
-  align-items: flex-start; flex-wrap: wrap; /* Allow wrapping */
-  position: relative;
-  z-index: 1;
+  align-items: flex-start; flex-wrap: wrap;
+  position: relative; /* Stacking context for children */
+  z-index: 1; /* コンテンツが背景要素より手前に来るように */
 }
 
 /* ─── Left Panel: Controls + Visualizer ─── */
 .controlPanel {
-  flex: 1 1 400px; min-width: 360px; /* Min width before wrap */
+  flex: 1 1 400px; min-width: 360px;
   display: flex; flex-direction: column; gap: 1.5rem;
   position: sticky; top: calc(var(--header-height) + 2rem); align-self: flex-start;
   max-height: calc(100vh - var(--header-height) - 4rem); overflow-y: auto;
-  background: rgba(18, 18, 18, 0.8); /* Darker glass */
+  background: rgba(18, 18, 18, 0.8);
   backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
   border-radius: 16px; padding: 1.8rem;
-  border: 1px solid rgba(255, 107, 0, 0.15); /* Orange border */
+  border: 1px solid rgba(255, 107, 0, 0.15);
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.35);
-  /* Hide scrollbar */
   -ms-overflow-style: none; scrollbar-width: none;
+  z-index: 2; /* contentWrapper 内で header よりは下だが、背景よりは上 */
 }
 .controlPanel::-webkit-scrollbar { display: none; }
 
 /* Section Base Style */
 .section {
-    background: rgba(28, 28, 28, 0.6); /* Slightly lighter inner section bg */
-    padding: 1.5rem; border-radius: 12px; /* Inner radius */
-    border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle inner border */
+    background: rgba(28, 28, 28, 0.6);
+    padding: 1.5rem; border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .section h2 {
-    font-size: 1.1rem; font-weight: 600; /* Adjusted weight */ margin-top: 0; margin-bottom: 1.2rem; /* More space */
+    font-size: 1.1rem; font-weight: 600; margin-top: 0; margin-bottom: 1.2rem;
     color: var(--kaika-white); border-bottom: 1px solid rgba(255, 107, 0, 0.2); padding-bottom: 0.6rem;
 }
 
@@ -249,23 +275,16 @@
 .statusIndicator { width: 8px; height: 8px; border-radius: 50%; transition: background-color 0.3s ease, box-shadow 0.3s ease; }
 .statusIndicator.connected { background-color: var(--kaika-mint-green); box-shadow: 0 0 5px var(--kaika-mint-green); }
 .statusIndicator.disconnected { background-color: var(--kaika-grey); }
-.statusText { /* unchanged */ }
+.statusText {}
 .transmittingText { margin-left: 0.5rem; font-style: italic; opacity: 0.8; color: var(--kaika-orange); }
-
 
 /* ─── Right Panel: Marketplace / Portfolio / Info ─── */
 .contentPanel {
-  flex: 2 1 500px; /* Flex properties */
+  flex: 2 1 500px;
   display: flex; flex-direction: column; gap: 2rem;
-  /* Glassmorphism for right panel too (optional) */
-  /* background: rgba(18, 18, 18, 0.8); */
-  /* backdrop-filter: blur(16px) saturate(140%); */
-  /* border-radius: 16px; */
-  /* padding: 1.5rem; */
-  /* border: 1px solid rgba(255, 107, 0, 0.1); */
   max-height: calc(100vh - var(--header-height) - 3rem); overflow-y: auto;
-   /* Hide scrollbar */
-   -ms-overflow-style: none; scrollbar-width: none;
+  -ms-overflow-style: none; scrollbar-width: none;
+  z-index: 2; /* contentWrapper 内で header よりは下だが、背景よりは上 */
 }
 .contentPanel::-webkit-scrollbar { display: none; }
 
@@ -275,10 +294,9 @@
 .error { background-color: rgba(255, 77, 77, 0.1); border-color: rgba(255, 77, 77, 0.5); color: #ff4d4d; }
 .pending { background-color: rgba(33, 150, 243, 0.1); border-color: rgba(33, 150, 243, 0.5); color: #5fa9f8; }
 
-/* Section Header (共通化) */
-.sectionHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid rgba(255, 107, 0, 0.15); } /* Increased bottom margin/padding */
+/* Section Header */
+.sectionHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid rgba(255, 107, 0, 0.15); }
 .sectionHeader h2 { font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--kaika-white); }
-/* Toggle Button for Portfolio/History */
 .toggleViewButton { background: none; border: 1px solid var(--kaika-light-grey); color: var(--kaika-light-grey); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; }
 .toggleViewButton:hover { border-color: var(--kaika-white); color: var(--kaika-white); background-color: rgba(255, 255, 255, 0.1); }
 
@@ -288,17 +306,14 @@
 .categoryButton:hover { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: var(--kaika-white); }
 .categoryButton.active { background-color: var(--kaika-orange); border-color: var(--kaika-orange); color: var(--kaika-black); font-weight: 600; }
 
-
-/* Feelings Section (Marketplace / Portfolio) */
-.section.feelingsSection { /* Base section style applied from .section */ }
-/* Grid Layout */
-.feelingsGrid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; } /* Adjusted minmax */
-.feelingGridItem { background: var(--kaika-dark-grey); /* Darker cards */ border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 107, 0, 0.1); /* Orange subtle border */ transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; display: flex; flex-direction: column; }
+/* Feelings Section */
+.section.feelingsSection {}
+.feelingsGrid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+.feelingGridItem { background: var(--kaika-dark-grey); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 107, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; display: flex; flex-direction: column; }
 .feelingGridItem:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); border-color: rgba(255, 107, 0, 0.3); }
 .feelingGridItem.selected { border-color: var(--kaika-orange); box-shadow: 0 0 18px var(--kaika-orange-light-glow); }
-.feelingGridItem.owned { /* specific owned styles if needed */ }
-.feelingGridItem.notOwned { /* specific not owned styles if needed */ }
-/* Category border */
+.feelingGridItem.owned {}
+.feelingGridItem.notOwned {}
 .feelingGridItem.nature { border-left: 4px solid rgba(76,175,80,.7); }
 .feelingGridItem.urban { border-left: 4px solid rgba(33,150,243,.7); }
 .feelingGridItem.abstract { border-left: 4px solid rgba(156,39,176,.7); }
@@ -307,7 +322,7 @@
 .feelingInfo { margin-bottom: 1rem; }
 .feelingHeader { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
 .feelingName { font-size: 1.05rem; font-weight: 600; color: var(--kaika-white); }
-.feelingDescription { font-size: 0.85rem; color: var(--kaika-light-grey); margin-bottom: 1rem; line-height: 1.5; flex-grow: 1; /* Allow description to take space */ }
+.feelingDescription { font-size: 0.85rem; color: var(--kaika-light-grey); margin-bottom: 1rem; line-height: 1.5; flex-grow: 1; }
 .feelingMetrics { display: flex; gap: 1rem; font-size: 0.75rem; color: var(--kaika-light-grey); margin-top: 0.5rem; }
 .metric { display: flex; gap: 0.3rem; align-items: baseline;}
 .metricLabel { font-weight: 500; }
@@ -317,22 +332,18 @@
 .buttons { margin-top: auto; padding-top: 1rem; display: flex; justify-content: center; align-items: center; min-height: 40px; }
 .loader { border: 3px solid rgba(255, 255, 255, 0.2); border-top: 3px solid var(--kaika-white); border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; margin: 0 auto; }
 
-/* Select Button (Action Button) */
 .actionButton { background: var(--kaika-mid-grey); color: var(--kaika-light-grey); border: 1px solid #444; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; width: 100%; }
 .actionButton:hover:not(:disabled) { background: #444; color: var(--kaika-white); border-color: #666; }
 .actionButton.selected { background: var(--kaika-orange); color: var(--kaika-black); border-color: var(--kaika-orange); cursor: default; }
 .actionButton:disabled { opacity: 0.5; cursor: not-allowed; background: var(--kaika-dark-grey) !important; border-color: #333 !important; color: #777 !important;}
 
-/* Purchase Button */
 .purchaseButton { background: var(--kaika-usdc-blue); color: var(--white); border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease; width: 100%; }
 .purchaseButton:hover:not(:disabled) { background: var(--kaika-usdc-blue-light); transform: scale(1.02); }
 .purchaseButton.purchasing { opacity: 0.7; cursor: default; }
 .purchaseButton:disabled { opacity: 0.5; cursor: not-allowed; background: var(--kaika-grey); transform: none; }
 
-/* NFT Badge */
 .nftBadge { position: absolute; top: 0.7rem; right: 0.7rem; background: linear-gradient(45deg, var(--kaika-orange), var(--kaika-orange-dark)); color: var(--kaika-black); font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 4px; text-transform: uppercase; cursor: help; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
-/* Transaction History View */
 .transactionHistory { max-height: 500px; overflow-y: auto; padding-right: 0.5rem; }
 .transactionList { list-style: none; padding: 0; margin: 0; }
 .transactionItem { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); gap: 1rem; }
@@ -350,7 +361,6 @@
 .transactionStatus.failed { background-color: rgba(255, 77, 77, 0.2); color: #ff4d4d; }
 .noTransactions { text-align: center; color: var(--kaika-light-grey); font-style: italic; padding: 2rem 0; }
 
-/* Premium Section */
 .section.premiumSection { margin-top: 1rem; }
 .premiumBanner { background: linear-gradient(45deg, rgba(156,39,176,.2), rgba(0, 255, 255, 0.1)); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid rgba(156,39,176,.5); }
 .premiumBanner h3 { margin-top: 0; margin-bottom: 0.5rem; color: var(--kaika-white); font-size: 1.1rem; }
@@ -358,185 +368,142 @@
 .waitlistButton { background: var(--kaika-white); color: var(--kaika-black); border: none; padding: 0.6rem 1.5rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease, background-color 0.2s ease; }
 .waitlistButton:hover { transform: scale(1.05); background-color: #eee; }
 
-/* Contract Info Section */
-.section.contractInfo { /* unchanged */ }
+.section.contractInfo {}
 .contractGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 1rem; }
 .contractItem { background-color: rgba(255, 255, 255, 0.03); padding: 0.8rem; border-radius: 8px; }
 .contractLabel { display: block; font-size: 0.75rem; color: var(--kaika-light-grey); margin-bottom: 0.2rem; }
 .contractValue { display: block; font-size: 0.9rem; font-weight: 500; color: var(--kaika-white); font-family: var(--kaika-font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 @media (max-width: 768px) {
-
-  /* --- ヘッダー調整 --- */
   .header {
-    padding: 0 1rem; /* 左右のパディングを減らす */
-    height: calc(var(--header-height) - 10px); /* ヘッダーを少し低くする (任意) */
+    padding: 0 1rem;
+    height: calc(var(--header-height) - 10px);
   }
   .walletInfo {
-    gap: 0.5rem; /* 要素間の隙間を減らす */
+    gap: 0.5rem;
   }
-  /* 例: スマホでは残高表示を隠す */
   .balanceContainer {
     display: none;
   }
-  /* 例: ウォレットアドレス表示を少し小さく */
   .walletAddress {
      font-size: 0.7rem;
      padding: 0.3rem 0.6rem;
   }
-  /* デバイス接続ボタンを小さく */
   .connectDeviceButton {
     font-size: 0.8rem;
     padding: 0.4rem 0.8rem;
   }
-  /* ウォレット接続ボタンを小さく */
   .walletButton :global(.wallet-adapter-button-trigger) {
      font-size: 0.8rem !important;
      padding: 0.5rem 0.8rem !important;
   }
-  /* データコレクターリンク調整 */
   .dataCollectorLink {
     font-size: 0.8rem;
     padding: 0.3rem 0.6rem;
     margin-right: 0.8rem;
   }
-
-
-  /* --- メインレイアウト: 縦積みに変更 --- */
   .contentWrapper {
-    flex-direction: column; /* ★ パネルを縦積みに */
-    padding: 1rem; /* 全体のパディングを減らす */
-    gap: 1.5rem; /* パネル間の隙間調整 */
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1.5rem;
   }
-
-  /* --- コントロールパネル (左側) 調整 --- */
   .controlPanel {
-    position: static; /* ★ sticky を解除 */
-    flex: none; /* flexの比率指定を解除 */
-    width: 100%; /* 幅を100%に */
-    max-height: none; /* 最大高さを解除 */
-    padding: 1rem; /* パディング調整 */
-    order: 2; /* ★ 表示順序をコンテンツパネルの下に (任意) */
-    /* スクロールバー表示設定 (必要なら) */
+    position: static;
+    flex: none;
+    width: 100%;
+    max-height: none;
+    padding: 1rem;
+    order: 2;
     overflow-y: visible;
     -ms-overflow-style: auto;
     scrollbar-width: auto;
   }
   .controlPanel::-webkit-scrollbar { display: block; }
-
   .section {
-    padding: 1rem; /* セクション内パディング調整 */
+    padding: 1rem;
   }
   .section h2 {
-     font-size: 1.1rem; /* タイトル文字サイズ調整 */
+     font-size: 1.1rem;
      margin-bottom: 1rem;
      padding-bottom: 0.5rem;
   }
-
-  /* ビジュアライザー調整 */
   .visualizer {
-    min-height: auto; /* 最低高さを解除 */
+    min-height: auto;
   }
   .feelingNameLarge { font-size: 1.2rem; }
   .feelingDescriptionLarge { font-size: 0.85rem; }
   .attributeLabel { width: 60px; font-size: 0.75rem;}
   .attributeValue { font-size: 0.75rem; }
   .playButton { font-size: 0.9rem; padding: 0.6rem 1.5rem;}
-
-
-  /* --- コンテンツパネル (右側) 調整 --- */
   .contentPanel {
-     flex: none; /* flexの比率指定を解除 */
-     width: 100%; /* 幅を100%に */
-     max-height: none; /* 最大高さを解除 */
-     order: 1; /* ★ 表示順序をコントロールパネルの上に (任意) */
-     /* スクロールバー表示設定 (必要なら) */
+     flex: none;
+     width: 100%;
+     max-height: none;
+     order: 1;
      overflow-y: visible;
      -ms-overflow-style: auto;
      scrollbar-width: auto;
   }
    .contentPanel::-webkit-scrollbar { display: block; }
-
-  /* セクションヘッダー調整 */
   .sectionHeader {
-      flex-direction: column; /* タイトルとボタンを縦積み */
-      align-items: flex-start; /* 左揃え */
-      gap: 0.8rem; /* 隙間調整 */
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.8rem;
       padding-bottom: 1rem;
   }
   .sectionHeader h2 { font-size: 1.25rem; }
   .toggleViewButton { font-size: 0.8rem; padding: 0.4rem 0.8rem;}
-  .categoryFilters { justify-content: flex-start; } /* カテゴリボタン左寄せ */
+  .categoryFilters { justify-content: flex-start; }
   .categoryButton { font-size: 0.75rem; padding: 0.3rem 0.8rem;}
-
-  /* Feelingグリッド調整 */
   .feelingsGrid {
-    /* スマホでは2列表示にする例 */
     grid-template-columns: repeat(2, 1fr);
-    /* または、より小さい画面でアイテムを大きく見せる場合 */
-    /* grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); */
-    gap: 1rem; /* 隙間調整 */
+    gap: 1rem;
   }
-  .feelingGridItem { /* カード調整 */ }
+  .feelingGridItem {}
   .feelingName { font-size: 0.9rem; }
   .feelingDescription { font-size: 0.8rem; margin-bottom: 0.8rem; }
   .feelingPrice { font-size: 0.9rem; }
   .actionButton, .purchaseButton { font-size: 0.8rem; padding: 0.5rem 1rem;}
   .nftBadge { font-size: 0.55rem; top: 0.5rem; right: 0.5rem;}
-
-  /* トランザクション履歴調整 */
   .transactionItem {
-      flex-direction: column; /* 縦積み */
-      align-items: flex-start; /* 左揃え */
+      flex-direction: column;
+      align-items: flex-start;
       gap: 0.5rem;
   }
   .transactionDetails {
-      width: 100%; /* 詳細部分を幅いっぱいに */
-      justify-content: space-between; /* 金額とハッシュ/ステータスを両端に */
+      width: 100%;
+      justify-content: space-between;
       gap: 0.5rem;
-      text-align: left; /* 左揃え */
+      text-align: left;
   }
   .transactionAmount { font-size: 0.85rem; }
   .transactionHash { font-size: 0.7rem; }
   .transactionStatus { font-size: 0.65rem; }
-
-  /* Premiumセクション調整 */
   .premiumBanner h3 { font-size: 1rem;}
   .premiumBanner p { font-size: 0.85rem;}
   .waitlistButton { font-size: 0.85rem; padding: 0.5rem 1.2rem;}
-
-  /* Contract Info グリッド調整 */
   .contractGrid {
-      /* スマホでは2列にする例 */
       grid-template-columns: repeat(2, 1fr);
       gap: 0.8rem;
   }
   .contractLabel { font-size: 0.7rem; }
   .contractValue { font-size: 0.8rem; }
-
 }
 
-/* =========================================== */
-/* === さらに小さい画面向け (例: 480px以下) === */
-/* =========================================== */
 @media (max-width: 480px) {
    .header {
      padding: 0 0.8rem;
-     height: calc(var(--header-height) - 15px); /* さらに低く */
+     height: calc(var(--header-height) - 15px);
    }
    .walletInfo {
-      /* 例: ウォレットアドレスも隠す */
       /* .walletAddress { display: none; } */
    }
-
-   /* Feeling グリッドを1列にするなど */
    .feelingsGrid {
       grid-template-columns: 1fr;
       gap: 0.8rem;
    }
-
    .controlPanel, .contentPanel, .section {
-       padding: 0.8rem; /* 全体のパディングをさらに詰める */
+       padding: 0.8rem;
    }
    .sectionHeader h2 { font-size: 1.1rem; }
 }
