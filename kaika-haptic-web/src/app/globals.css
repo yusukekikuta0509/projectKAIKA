@@ -5,95 +5,81 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #1a1a1a; /* 基本背景色 */
-  color: #f1f1f1;      /* 基本文字色 */
-  font-family: 'Inter', 'SF Pro Display', 'Roboto', sans-serif; /* 基本フォント */
-  box-sizing: border-box; /* box-sizingリセット */
+  background: #0d1724;     /* 深いブルーグリーンの夜空 / 森の霧 */
+  color: #eaf8ff;          /* 淡いシアンホワイト */
+  font-family: 'Inter', 'SF Pro Display', 'Roboto', sans-serif;
+  box-sizing: border-box;
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: inherit; /* 親から継承 */
+  box-sizing: inherit;
 }
 
 /* ===== カラーパレットと基本変数 ===== */
-/* :root は一つにまとめる */
 :root {
-  --kaika-orange: #ff6b00;
-  --kaika-orange-dark: #e65c00;
-  --kaika-orange-glow: rgba(255, 107, 0, 0.6);
-  --kaika-orange-light-glow: rgba(255, 107, 0, 0.3);
-  --kaika-black: #0A0A0A;
-  --kaika-near-black: #111111;
-  --kaika-dark-grey: #1a1a1a;
-  --kaika-mid-grey: #2a2a2a;
-  --kaika-light-grey: #aeaeae;
-  --kaika-white: #f0f0f0;
-  --kaika-accent-cyan: #00ffff;
-  --kaika-accent-cyan-glow: rgba(0, 255, 255, 0.7);
-  --kaika-mint-green: #00ffa3;
-  --kaika-usdc-blue: #2775CA;
+  /* ―― Warm orange accent (街灯・テールランプ) ―― */
+  --kaika-orange:            #ffb86b;
+  --kaika-orange-dark:       #dfa460;
+  --kaika-orange-glow:       rgba(255, 184, 107, 0.6);
+  --kaika-orange-light-glow: rgba(255, 184, 107, 0.3);
+
+  /* ―― Neutral bases ―― */
+  --kaika-black:          #0A0A0A;
+  --kaika-near-black:     #111111;
+  --kaika-dark-grey:      #0d1724;   /* 背景と同系色で統一 */
+  --kaika-mid-grey:       #1a2533;
+  --kaika-light-grey:     #9eb5c5;
+  --kaika-white:          #eaf8ff;
+
+  /* ―― Neon cyan (ビルネオン & UIプライマリ) ―― */
+  --kaika-accent-cyan:        #2ad8ff;
+  --kaika-accent-cyan-glow:   rgba(42, 216, 255, 0.7);
+
+  /* ―― Optional secondary hues (そのまま or 調整不要) ―― */
+  --kaika-mint-green:      #00ffa3;
+  --kaika-usdc-blue:       #2775CA;
   --kaika-usdc-blue-light: #5fa9f8;
+
+  /* Fonts & layout constants */
   --kaika-font-sans: 'Inter', sans-serif;
   --kaika-font-mono: 'Roboto Mono', monospace;
   --header-height: 70px;
 }
 
-
 /* ===== React Modal Animation Styles ===== */
-/* (react-modalが自動付与するデフォルトクラスに対するアニメーション設定) */
-
-/* オーバーレイのトランジション */
 .ReactModal__Overlay {
   opacity: 0;
-  transition: opacity 300ms ease-in-out; /* モーダルの closeTimeoutMS と合わせる */
-  /* ↓↓↓ オーバーレイの基本スタイルもここに記述 (module から移動 or 重複定義) ↓↓↓ */
+  transition: opacity 300ms ease-in-out;
   position: fixed;
-  inset: 0; /* top: 0; left: 0; right: 0; bottom: 0; */
-  background-color: rgba(0, 0, 0, 0.75); /* 背景色 */
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* 高い z-index */
+  z-index: 1000;
 }
-.ReactModal__Overlay--after-open {
-  opacity: 1;
-}
-.ReactModal__Overlay--before-close {
-  opacity: 0;
-}
+.ReactModal__Overlay--after-open { opacity: 1; }
+.ReactModal__Overlay--before-close { opacity: 0; }
 
-/* コンテンツのトランジション */
 .ReactModal__Content {
   opacity: 0;
-  transform: scale(.9) translateY(-20px); /* 初期状態 */
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* アニメーション */
-  /* ↓↓↓ コンテンツの基本スタイルもここに記述 (module から移動 or 重複定義) ↓↓↓ */
-  /*
-    注意: ここでコンテンツの基本的な見た目 (背景色、padding, border-radiusなど) も
-    定義することは可能ですが、通常はこれらは `.module.css` のクラスで指定し、
-    ここではアニメーション関連のプロパティ (`opacity`, `transform`, `transition`) と
-    最低限必要な `position` や `overflow` などを定義するのが一般的です。
-    ここではアニメーションのみに絞ります。
-  */
-  position: relative; /* 内部要素の配置基準 */
-  overflow: auto; /* 内容が多い場合にスクロール */
-  outline: none; /* フォーカスアウトライン */
-  border: none; /* デフォルトのボーダーを消す */
-  /* background: transparent; */ /* module側で設定する場合 */
-  /* padding: 0; */ /* module側で設定する場合 */
+  transform: scale(.9) translateY(-20px);
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  position: relative;
+  overflow: auto;
+  outline: none;
+  border: none;
 }
 .ReactModal__Content--after-open {
   opacity: 1;
-  transform: scale(1) translateY(0); /* 開いた後の状態 */
+  transform: scale(1) translateY(0);
 }
 .ReactModal__Content--before-close {
   opacity: 0;
-  transform: scale(.9) translateY(-20px); /* 閉じる前のアニメーション */
+  transform: scale(.9) translateY(-20px);
 }
-
-/* ===== End React Modal Animation Styles ===== */
 
 /* ===== Wallet Adapter UI Overrides (必要なら) ===== */
 /* .wallet-adapter-button-trigger { ... } */

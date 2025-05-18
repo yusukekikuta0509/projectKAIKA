@@ -47,6 +47,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
      const teamRef   = useRef<HTMLDivElement>(null);
      const launchRef = useRef<HTMLDivElement>(null);
      const gradRef   = useRef<HTMLDivElement>(null);
+     
 
      /* ───── Hooks ───── */
      const pathname = usePathname(); // 現在のパスを取得
@@ -158,6 +159,7 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
            console.log("GSAP Context revert complete");
        };
      }, [pathname]);
+     
 
      // XとTelegramのURL (実際のURLに置き換えてください)
      const X_ACCOUNT_URL = "https://x.com/kaika_haptics"; // 例: ご自身のXアカウントURL
@@ -183,10 +185,10 @@ function debounce<Params extends any[], Func extends (...args: Params) => void>(
 
          {/* Hero */}
          <section className={styles.hero}>
-           <h1 className={styles.catchphrase}>Bring the beach to your treadmill with haptic soles</h1>
+           <h1 className={styles.catchphrase}>Haptics Shoes for Everyday Adventure.</h1>
            <p className={styles.description}>
-             Feel the ground with haptic insoles that turn indoor workouts into an immersive experience,
-             converting every step into on-chain rewards.
+           We make haptic insoles that turn your everyday walk into an adventure.
+
            </p>
            <div className={styles.heroCta}>
              <Link href="/app/haptic"><button className={styles.primaryButton}>Launch App</button></Link>

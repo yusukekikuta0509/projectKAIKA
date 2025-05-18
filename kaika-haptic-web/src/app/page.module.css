@@ -4,29 +4,26 @@
 
 /* ===== リセット & 変数 ===== */
 
-
 .main{
-  --primary-color:#ff6b00;
-  --primary-dark:#cc5500;
-  --primary-light:#ff8c33;
-  --secondary-color:#ffb300;
-  --accent-color:#ffce66;
-  --bg-color:#1a1a1a;
-  --card-bg:rgba(255,255,255,0.03);
-  --text-color:#f1f1f1;
-  --text-secondary:#a8a8a8;
-  --border-color:rgba(255,255,255,.06);
-  --gradient-start:#ff6b00;
-  --gradient-end:#ffb300;
-  --dot-color:rgba(255,255,255,0.05);
+  --primary-color:  #2AD8FF;   /* シアン系ネオン（街側サイン）           */
+  --primary-dark:   #1A9FC8;
+  --primary-light:  #4BE6FF;
 
-  position:relative;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  background:var(--bg-color);
-  color:var(--text-color);
-  overflow-x:hidden;
+  --secondary-color:#FF48C4;   /* マゼンタネオン（ビルの広告/看板）       */
+  --accent-color:   #FFB86B;   /* 街灯・車のライトに近い暖色アクセント    */
+
+  /* ── Surfaces & Text ── */
+  --bg-color:       #0D1724;   /* 霧がかった深いブルーグリーン（夜空/森） */
+  --card-bg:        rgba(255,255,255,0.04); /* ガラス越しの淡い映り込み      */
+  --border-color:   rgba(255,255,255,0.07);
+
+  --text-color:     #EAF8FF;   /* 高コントラストな淡いシアンホワイト      */
+  --text-secondary: #9EB5C5;   /* くすんだブルーグレー                    */
+
+  /* ── Effects ── */
+  --gradient-start: #2AD8FF;   /* 左側のシアン光源                        */
+  --gradient-end:   #FF48C4;   /* 右側のマゼンタ光源                      */
+  --dot-color:      rgba(255,255,255,0.03); /* ドットグリッドは控えめに      */
 }
 
 /* ===== 背景エフェクト ===== */
@@ -36,7 +33,7 @@
   width:100%; height:100%;
   z-index:0;
   pointer-events:none;
-  background:radial-gradient(circle at 20% 50%, rgba(255,107,0,0.08) 0%, rgba(0,0,0,0) 70%);
+  background:radial-gradient(circle at 20% 50%, rgba(42,216,255,0.10) 0%, rgba(0,0,0,0) 70%);
 }
 .dotGrid{
   position:fixed;
@@ -81,7 +78,7 @@
 .walletButton:hover{
   background:var(--primary-light);
   transform:translateY(-2px);
-  box-shadow:0 4px 10px -2px rgba(255,107,0,0.3);
+  box-shadow:0 4px 10px -2px rgba(42,216,255,0.3);
 }
 
 /* ===== Hero ===== */
@@ -130,7 +127,7 @@
 .primaryButton:hover{
   transform:translateY(-2px);
   background:var(--primary-light);
-  box-shadow:0 8px 16px -4px rgba(255,107,0,0.3);
+  box-shadow:0 8px 16px -4px rgba(42,216,255,0.3);
 }
 .secondaryButton{
   background:rgba(255,255,255,0.05);
@@ -179,7 +176,7 @@
   display:flex; align-items:center; justify-content:center;
   width:40px; height:40px;
   border-radius:8px;
-  background:rgba(255,107,0,0.1);
+  background:rgba(42,216,255,0.1);
   font-size:1.5rem;
   margin-bottom:1rem;
 }
@@ -194,7 +191,7 @@
 .deviceFeature{display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem;color:var(--text-secondary);}
 .featureNumber{
   width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  border-radius:8px;background:rgba(255,107,0,.1);
+  border-radius:8px;background:rgba(42,216,255,.1);
   color:var(--primary-color);font-weight:600;font-size:.9rem;
 }
 .purchaseButton{
@@ -205,7 +202,7 @@
 .purchaseButton:hover{
   transform:translateY(-2px);
   background:var(--primary-light);
-  box-shadow:0 8px 16px -4px rgba(255,107,0,0.3);
+  box-shadow:0 8px 16px -4px rgba(42,216,255,0.3);
 }
 .deviceVisual{flex:1;min-width:300px;display:flex;justify-content:center;align-items:center;}
 .deviceImage{border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.5);
@@ -251,7 +248,7 @@ object-fit: cover;
 }
 .launchButton:hover{
   transform:translateY(-2px);background:var(--primary-light);
-  box-shadow:0 12px 24px -6px rgba(255,107,0,0.3);
+  box-shadow:0 12px 24px -6px rgba(42,216,255,0.3);
 }
 .launchButton::before{
   content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
@@ -287,6 +284,8 @@ object-fit: cover;
   margin: 0 auto;
 }
 
+
+
 /* Grid layout for medium screens and up (3 columns) */
 @media (min-width: 768px) {
   .aboutGrid {
@@ -302,21 +301,21 @@ object-fit: cover;
   backdrop-filter: blur(10px);
   padding: 2rem 1.5rem; /* Adjust padding */
   border-radius: 12px;
-  border: 1px solid rgba(255, 107, 0, 0.15); /* Subtle orange border */
+  border: 1px solid rgba(42,216,255,0.15); /* Subtle cyan border */
   text-align: left; /* Align text left */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .aboutCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(255, 107, 0, 0.1); /* Orange glow on hover */
+  box-shadow: 0 10px 25px rgba(42,216,255,0.1); /* Cyan glow on hover */
 }
 
 .featureIcon {
   display: inline-block;
   font-size: 2rem; /* Icon size */
   margin-bottom: 1rem;
-  color: var(--kaika-orange); /* Orange icon color */
+  color: var(--kaika-orange); /* （元変数名のまま） */
   /* If using react-icons, direct styling might be needed */
 }
 .aboutCard svg { /* Style react-icons specifically */
@@ -368,8 +367,8 @@ object-fit: cover;
     overflow: hidden;
     margin-left: auto;
     margin-right: auto;
-    border: 2px solid rgba(255, 107, 0, 0.3); /* Orange border */
-    box-shadow: 0 0 10px rgba(255, 107, 0, 0.1);
+    border: 2px solid rgba(42,216,255,0.3); /* Cyan border */
+    box-shadow: 0 0 10px rgba(42,216,255,0.1);
 }
 
 .memberAvatar {
@@ -406,7 +405,7 @@ object-fit: cover;
   background: rgba(35, 35, 35, 0.5);
   padding: 1.8rem 1rem 1.5rem 1rem;
   border-radius: 12px;
-  border: 1px solid rgba(255, 107, 0, 0.1);
+  border: 1px solid rgba(42,216,255,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .memberCard:hover {
